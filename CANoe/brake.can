@@ -1,0 +1,45 @@
+/*@!Encoding:949*/
+includes
+{
+  
+}
+
+variables
+{
+  //send message
+  message Brake_Control_ECU Brake_Control_ECU;
+  
+  //timer
+  msTimer t_brake;
+  
+  //var
+  int brake_level=0;
+}
+
+on start
+{
+  setTimerCyclic(t_brake, 5);
+}
+
+on timer t_brake
+{
+  if (@Brake::brake_pressed == 1)
+  {
+    if(brake_level<100)
+    {
+      brake_level++;
+      Brake_Control_ECU.sig_brake_pressed = 1;
+      Brake_Control_ECU.sig_brake_level = brake_level;
+    }
+  }
+  else
+  {
+    brake_level=0;
+    Brake_Control_ECU.sig_brake_pressed = 0;
+    Brake_Control_ECU.sig_brake_level = brake_level;
+  }
+  output(Brake_Control_ECU);
+}
+
+
+

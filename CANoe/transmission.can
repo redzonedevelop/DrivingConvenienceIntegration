@@ -6,8 +6,12 @@ includes
 
 variables
 {
-  msTimer sendTimer;
+  //send message
   message PCAN::Transmission_Info_ECU transmission_info_msg;
+  
+  //timer
+  msTimer sendTimer;
+  
 }
 
 on start 
@@ -18,6 +22,5 @@ on start
 on timer sendTimer
 {
   transmission_info_msg.sig_gear_mode = @sysvar::Transmission::gear;
-  
 }
 

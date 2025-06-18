@@ -15,7 +15,7 @@
           <d2p1:Value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;SymbolSelectionProperties xmlns:i="http://www.w3.org/2001/XMLSchema-instance"&gt;
 &lt;AreDiagQualifiersShown&gt;false&lt;/AreDiagQualifiersShown&gt;
-&lt;CurrentViewId&gt;NetworkSymbols&lt;/CurrentViewId&gt;
+&lt;CurrentViewId&gt;Variables&lt;/CurrentViewId&gt;
 &lt;SearchProperties&gt;
 &lt;SearchTermHistory /&gt;
 &lt;/SearchProperties&gt;
@@ -339,6 +339,15 @@
 &lt;NodeTreeProperties&gt;
 &lt;NodeProperties&gt;
 &lt;NodeKey&gt;{RootSymbolItem/{SysVarGroupItem/Light&lt;/NodeKey&gt;
+&lt;/NodeProperties&gt;
+&lt;NodeProperties&gt;
+&lt;NodeKey&gt;{RootSymbolItem/{SysVarGroupItem/Motor&lt;/NodeKey&gt;
+&lt;/NodeProperties&gt;
+&lt;NodeProperties&gt;
+&lt;NodeKey&gt;{RootSymbolItem/{SysVarGroupItem/Transmission&lt;/NodeKey&gt;
+&lt;/NodeProperties&gt;
+&lt;NodeProperties&gt;
+&lt;NodeKey&gt;{RootSymbolItem/{SysVarGroupItem/Brake&lt;/NodeKey&gt;
 &lt;/NodeProperties&gt;
 &lt;/NodeTreeProperties&gt;
 &lt;/ViewProperties&gt;
