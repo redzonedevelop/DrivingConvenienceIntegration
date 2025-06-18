@@ -6,17 +6,61 @@ includes
 
 variables
 {
-  message PCAN::Motor_Info_ECU motor_info_oc_msg;
-  
+  //send message
+  message Motor_Info_ECU motor_info_oc_msg;
+
+  //timer
+  msTimer t_motor;
+
+  //var
+  int brake_pressed = 0;  
 }
 
+on start
+{
+  setTimerCyclic(t_motor, 5);
+}
+
+//ADAS
 on message PCAN::ADAS_Control_Motor
 {
   motor_info_oc_msg.sig_car_speed = this.sig_control_speed;
-  if(@sysvar::Transmission::gear<1)
+
+  if(@sysvar::Transmission::gear<3&&this.sig_control_speed>0)
+
   {
-    @sysvar::Transmission::gear = 1;
+    @sysvar::Transmission::gear = 3;
   }
-  
   output(motor_info_oc_msg);
+}
+
+on timer t_motor
+{     
+  if(brake_pressed==0)
+  {
+     motor_info_oc_msg.sig_car_speed = @Motor::longitudinal_speed;
+  }
+  else
+  {
+    if(@Motor::longitudinal_speed>0)
+    {
+      @Motor::longitudinal_speed--;
+      motor_info_oc_msg.sig_car_speed = @Motor::longitudinal_speed;
+    }  
+  }
+  output(motor_info_oc_msg);
+}
+
+
+//Brake
+on message Brake_Control_Motor
+{
+   if(this.sig_brake_pressed==1)
+   {
+     brake_pressed = 1;
+   }
+   else
+   {
+     brake_pressed = 0;
+   }
 }
