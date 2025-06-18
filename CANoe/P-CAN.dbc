@@ -1,0 +1,122 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Master BMS Transmission Motor
+
+
+BO_ 515 OBD_Neg_Respond_OBD: 2 Master
+ SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  BMS,Motor,Transmission
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  BMS,Motor,Transmission
+
+BO_ 514 OBD_Pos_Respond_OBD: 1 Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  BMS,Motor,Transmission
+
+BO_ 1668 VUM_File_BMS: 1 Master
+ SG_ sig_payload : 0|8@1+ (1,0) [0|255] ""  BMS
+
+BO_ 1667 VUM_File_Transmission: 1 Master
+ SG_ sig_payload : 0|8@1+ (1,0) [0|255] ""  Transmission
+
+BO_ 1666 VUM_File_Motor: 1 Master
+ SG_ sig_payload : 0|8@1+ (1,0) [0|255] ""  Motor
+
+BO_ 1665 VUM_Metadata_ECU: 1 Master
+ SG_ sig_metadata : 0|8@1+ (1,0) [0|255] ""  BMS,Motor,Transmission
+
+BO_ 1664 VUM_Request_ECU: 1 Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  BMS,Motor,Transmission
+
+BO_ 1281 ADAS_Control_Motor: 2 Master
+ SG_ sig_control_speed : 0|10@1- (1,0) [-512|511] "g"  Motor
+
+BO_ 128 Brake_Control_Motor: 1 Master
+ SG_ sig_brake_level : 1|7@1+ (1,0) [0|127] "%"  Motor
+ SG_ sig_brake_pressed : 0|1@1+ (1,0) [0|1] "flag"  Motor
+
+BO_ 1099 BMS_Neg_Respond_OTA: 2 BMS
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+ SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1098 BMS_Pos_Respond_OTA: 8 BMS
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+ SG_ sig_data : 8|56@1+ (1,0) [0|7.20575940379279E+16] ""  Master
+
+BO_ 69 BMS_Request_OBD: 1 BMS
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1065 Transmission_Neg_Respond_OTA: 2 Transmission
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+ SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1064 Transmission_Pos_Respond_OTA: 8 Transmission
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+ SG_ sig_data : 8|56@1+ (1,0) [0|7.20575940379279E+16] ""  Master
+
+BO_ 36 Transmission_Request_OBD: 1 Transmission
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1031 Motor_Neg_Respond_OTA: 2 Motor
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+ SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1030 Motor_Pos_Respond_OTA: 8 Motor
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+ SG_ sig_data : 8|56@1+ (1,0) [0|7.20575940379279E+16] ""  Master
+
+BO_ 3 Motor_Request_OBD: 1 Motor
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1090 Battery_Info_Cluster: 2 BMS
+ SG_ sig_regen_brake_active : 9|1@1+ (1,0) [0|1] "flag"  Master
+ SG_ sig_charging_state : 8|1@1+ (1,0) [0|1] "flag"  Master
+ SG_ sig_battery_level : 0|8@1+ (1,0) [0|255] "%"  Master
+
+BO_ 1057 Transmission_Info_ECU: 1 Transmission
+ SG_ sig_gear_mode : 0|2@1+ (1,0) [0|3] "stage"  Master
+
+BO_ 1024 Motor_Info_ECU: 5 Motor
+ SG_ sig_wheel_speed_RR : 32|8@1+ (1,0) [0|255] "km/h"  Master
+ SG_ sig_wheel_speed_RL : 24|8@1+ (1,0) [0|255] "km/h"  Master
+ SG_ sig_wheel_speed_FR : 16|8@1+ (1,0) [0|255] "km/h"  Master
+ SG_ sig_wheel_speed_FL : 8|8@1+ (1,0) [0|255] "km/h"  Master
+ SG_ sig_car_speed : 0|8@1+ (1,0) [0|255] "km/h"  Master
+
+
+
+BA_DEF_  "MultiplexExtEnabled" ENUM  "No","Yes";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "MultiplexExtEnabled" "No";
+BA_DEF_DEF_  "BusType" "CAN";
+

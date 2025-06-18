@@ -1,0 +1,153 @@
+/*@!Encoding:949*/
+includes
+{
+  
+}
+
+
+variables
+{
+  //P-CAN
+  message PCAN::Brake_Control_Motor brake_control_p_msg;
+  message PCAN::ADAS_Control_Motor motor_control_p_msg;
+  
+  //C-CAN
+  message CCAN::Motor_Info_ECU motor_info_c_msg;
+  message CCAN::ADAS_Control_Steering steering_control_c_msg;
+  //B-CAN
+  //ADAS-CAN
+  
+  //OTA-CAN
+  //OC-CAN
+  message OCCAN::ABS_Info_Cluster abs_info_oc_msg;
+  message OCCAN::ADAS_Info_Cluster adas_info_oc_msg;
+  message OCCAN::AEB_Info_ECU aeb_info_oc_msg;
+  message OCCAN::Battery_Info_Cluster battery_info_oc_msg;
+  message OCCAN::Light_Info_Cluster light_info_oc_msg;
+  message OCCAN::Motor_Info_ECU motor_info_oc_msg;
+  message OCCAN::Steering_Angle_Info_ECU steering_angle_oc_msg;
+  message OCCAN::Transmission_Info_ECU transmission_info_oc_msg;
+}
+
+
+
+//P-CAN
+on message PCAN::Transmission_Info_ECU
+{
+  transmission_info_oc_msg.sig_gear_mode = this.sig_gear_mode;
+  
+  output(transmission_info_oc_msg);
+}
+
+on message PCAN::Battery_Info_Cluster
+{
+  battery_info_oc_msg.sig_battery_level      = this.sig_battery_level;
+  battery_info_oc_msg.sig_charging_state     = this.sig_charging_state;
+  battery_info_oc_msg.sig_regen_brake_active = this.sig_regen_brake_active;
+}
+
+on message PCAN::Motor_Info_ECU
+{
+  motor_info_c_msg.sig_car_speed       = this.sig_car_speed;
+  motor_info_c_msg.sig_wheel_speed_FL  = this.sig_wheel_speed_FL;
+  motor_info_c_msg.sig_wheel_speed_FR  = this.sig_wheel_speed_FR;
+  motor_info_c_msg.sig_wheel_speed_RL  = this.sig_wheel_speed_RL;
+  motor_info_c_msg.sig_wheel_speed_RR  = this.sig_wheel_speed_RR;
+  
+  motor_info_oc_msg.sig_car_speed       = this.sig_car_speed;
+  motor_info_oc_msg.sig_wheel_speed_FL  = this.sig_wheel_speed_FL;
+  motor_info_oc_msg.sig_wheel_speed_FR  = this.sig_wheel_speed_FR;
+  motor_info_oc_msg.sig_wheel_speed_RL  = this.sig_wheel_speed_RL;
+  motor_info_oc_msg.sig_wheel_speed_RR  = this.sig_wheel_speed_RR;
+
+  output(motor_info_c_msg);
+  output(motor_info_oc_msg);
+}
+//C-CAN
+on message CCAN::Brake_Control_ECU
+{
+  brake_control_p_msg.sig_brake_pressed =  this.sig_brake_pressed;
+  brake_control_p_msg.sig_brake_level = this.sig_brake_level;
+  
+  output(brake_control_p_msg);
+}
+
+on message CCAN::ABS_Info_Cluster
+{
+  abs_info_oc_msg.sig_abs_active = this.sig_abs_active;
+  output(abs_info_oc_msg);
+}
+
+//B-CAN
+on message BODY::Light_Info_Cluster
+{
+  light_info_oc_msg.sig_fog_light  = this.sig_fog_light;
+  light_info_oc_msg.sig_high_beam  = this.sig_high_beam;
+  light_info_oc_msg.sig_low_beam   = this.sig_low_beam;
+  
+  output(light_info_oc_msg);
+}
+
+on message BODY::Steering_Angle_Info_ECU
+{
+  steering_angle_oc_msg.sig_steering_angle = this.sig_steering_angle;
+  
+  output(steering_angle_oc_msg);
+}
+//ADAS-CAN
+on message ADASCAN::ADAS_Control_Brake
+{
+  aeb_info_oc_msg.sig_aeb_active = this.sig_control_aeb;
+  
+  output(aeb_info_oc_msg);
+}
+
+on message ADASCAN::ADAS_Control_Motor
+{
+  //motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//그냥 longitudinal speed를 줘버릴까
+  motor_control_p_msg.sig_control_speed = @sysvar::Motor::longitudinal_speed;
+  output(motor_control_p_msg);
+}
+
+on message ADASCAN::ADAS_Control_Steering
+{
+  steering_control_c_msg.sig_control_steering = this.sig_control_steering; // todo스티어링에서 계산해서저장해둬야함.
+  output(steering_control_c_msg);
+}
+
+on message ADASCAN::ADAS_Info_Cluster
+{
+  adas_info_oc_msg.sig_ACC = this.sig_ACC;
+  adas_info_oc_msg.sig_AEB = this.sig_AEB;
+  adas_info_oc_msg.sig_LKA = this.sig_LKA;
+  output(adas_info_oc_msg);
+}
+
+on message ADASCAN::ADAS_Neg_Respond_OTA
+{
+  
+}
+
+on message ADASCAN::ADAS_Pos_Respond_OTA
+{
+  
+}
+
+on message ADASCAN::ADAS_Request_OBD
+{
+  
+}
+
+
+//OTA-CAN
+//OC-CAN
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,197 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Master Cluster OBD
+VAL_TABLE_ chargingState 1 "charging" 0 "not charging" ;
+VAL_TABLE_ gearMode 3 "D" 2 "N" 1 "R" 0 "P" ;
+VAL_TABLE_ onOff 1 "ON" 0 "OFF" ;
+VAL_TABLE_ TestECUState 1 "ON" 0 "OFF" ;
+VAL_TABLE_ vtbSensorReqCause 15 "SNA" 2 "by Request 2" 1 "by Request 1" 0 "normal cycle" ;
+VAL_TABLE_ vtbErrorDescription 255 "ERROR" ;
+
+
+BO_ 1280 ADAS_Info_Cluster: 1 Master
+ SG_ sig_LKA : 2|1@1+ (1,0) [0|1] ""  Cluster
+ SG_ sig_AEB : 1|1@1+ (1,0) [0|1] ""  Cluster
+ SG_ sig_ACC : 0|1@1+ (1,0) [0|1] ""  Cluster
+
+BO_ 130 AEB_Info_ECU: 1 Vector__XXX
+ SG_ sig_aeb_active : 0|1@1+ (1,0) [0|1] "flag"  Cluster
+
+BO_ 1185 ABS_Info_Cluster: 1 Master
+ SG_ sig_abs_active : 0|1@1+ (1,0) [0|1] "flag"  Cluster
+
+BO_ 1679 VUM_File_Cluster: 8 Master
+ SG_ sig_payload : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1445 Illuminate_Info_Cluster: 2 Master
+ SG_ sig_lux_info : 0|16@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1090 Battery_Info_Cluster: 2 Master
+ SG_ sig_lux_info : 16|16@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_regen_brake_active : 9|1@1- (1,0) [0|0] ""  Cluster
+ SG_ sig_charging_state : 8|1@1- (1,0) [0|0] ""  Cluster
+ SG_ sig_battery_level : 0|8@1- (1,0) [0|100] ""  Cluster
+
+BO_ 1481 Light_Info_Cluster: 1 Master
+ SG_ sig_fog_light : 2|1@1- (1,0) [0|0] ""  Cluster
+ SG_ sig_low_beam : 1|1@1- (1,0) [0|0] ""  Cluster
+ SG_ sig_high_beam : 0|1@1- (1,0) [0|0] ""  Cluster
+
+BO_ 1219 Steering_Angle_Info_ECU: 1 Master
+ SG_ sig_steering_angle : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1057 Transmission_Info_ECU: 1 Master
+ SG_ sig_gear_mode : 0|2@1- (1,0) [0|0] ""  Cluster
+
+BO_ 1024 Motor_Info_ECU: 5 Master
+ SG_ sig_wheel_speed_RR : 32|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_wheel_speed_RL : 24|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_wheel_speed_FR : 16|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_wheel_speed_FL : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_car_speed : 0|8@1- (1,0) [0|0] ""  Cluster
+
+BO_ 1575 Cluster_Neg_Respond_OTA: 2 Cluster
+ SG_ sig_sid : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_neg_respond : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1574 Cluster_Pos_Respond_OTA: 8 Cluster
+ SG_ sig_data : 16|56@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 549 Cluster_Request_OBD: 1 Cluster
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1678 VUM_File_OBD: 8 Master
+ SG_ sig_payload : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1665 VUM_Metadata_ECU: 8 Master
+ SG_ sig_metadata : 0|64@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1664 VUM_Request_ECU: 1 Master
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 260 ECU_Request_OBD: 1 Master
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 0 OBD_MIL_Cluster: 1 OBD
+ SG_ sig_mil : 0|1@1- (1,0) [0|0] ""  Cluster
+
+BO_ 515 OBD_Neg_Respond_OBD: 2 OBD
+ SG_ sig_sid : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_neg_respond : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 514 OBD_Pos_Respond_OBD: 1 OBD
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1537 OBD_Neg_Respond_OTA: 2 OBD
+ SG_ sig_sid : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_neg_respond : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1536 OBD_Pos_Respond_OTA: 8 OBD
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+
+
+BA_DEF_  "DatabaseVersion" STRING ;
+BA_DEF_ BO_  "DiagState" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagResponse" ENUM  "No","Yes","vector_leerstring";
+BA_DEF_ BO_  "DiagRequest" ENUM  "No","Yes","vector_leerstring";
+BA_DEF_  "Manufacturer" STRING ;
+BA_DEF_ BU_  "NodeLayerModules" STRING ;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ SG_  "GenSigStartValue" FLOAT 0 1215752192;
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed";
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 100000;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotUsed","Cyclic","NotUsed","IfActive","NoMsgSendType","NotUsed","vector_leerstring";
+BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 999999;
+BA_DEF_ BO_  "GenMsgDelayTime" INT 0 1000;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 50000;
+BA_DEF_ BO_  "GenMsgCycleTimeFast" INT 0 50000;
+BA_DEF_ BO_  "GenMsgILSupport" ENUM  "No","Yes";
+BA_DEF_ BO_  "GenMsgFastOnStart" INT 0 100000;
+BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 100000;
+BA_DEF_DEF_  "DatabaseVersion" "";
+BA_DEF_DEF_  "DiagState" "No";
+BA_DEF_DEF_  "DiagResponse" "No";
+BA_DEF_DEF_  "DiagRequest" "No";
+BA_DEF_DEF_  "Manufacturer" "Vector";
+BA_DEF_DEF_  "NodeLayerModules" "CANoeILNLVector.dll";
+BA_DEF_DEF_  "BusType" "CAN";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenMsgCycleTime" 200;
+BA_DEF_DEF_  "GenMsgCycleTimeFast" 20;
+BA_DEF_DEF_  "GenMsgILSupport" "Yes";
+BA_DEF_DEF_  "GenMsgFastOnStart" 0;
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_ "BusType" "CAN";
+BA_ "DatabaseVersion" "1.1";
+BA_ "GenMsgCycleTime" BO_ 1445 100;
+BA_ "GenMsgSendType" BO_ 1445 0;
+BA_ "GenMsgCycleTime" BO_ 1090 100;
+BA_ "GenMsgSendType" BO_ 1090 0;
+BA_ "GenMsgCycleTime" BO_ 1481 100;
+BA_ "GenMsgSendType" BO_ 1481 0;
+BA_ "GenMsgCycleTime" BO_ 1219 5;
+BA_ "GenMsgSendType" BO_ 1219 0;
+BA_ "GenMsgCycleTime" BO_ 1057 100;
+BA_ "GenMsgSendType" BO_ 1057 0;
+BA_ "GenMsgCycleTime" BO_ 1024 5;
+BA_ "GenMsgSendType" BO_ 1024 0;
+BA_ "GenMsgCycleTime" BO_ 1575 0;
+BA_ "GenMsgCycleTime" BO_ 1574 0;
+BA_ "GenMsgCycleTime" BO_ 549 0;
+BA_ "GenMsgCycleTime" BO_ 1678 0;
+BA_ "GenMsgCycleTime" BO_ 1665 0;
+BA_ "GenMsgCycleTime" BO_ 1664 0;
+BA_ "GenMsgCycleTime" BO_ 260 0;
+BA_ "GenMsgCycleTime" BO_ 0 0;
+BA_ "GenMsgCycleTime" BO_ 515 0;
+BA_ "GenMsgCycleTime" BO_ 514 0;
+BA_ "GenMsgCycleTime" BO_ 1537 0;
+BA_ "GenMsgCycleTime" BO_ 1536 0;
+VAL_ 1090 sig_regen_brake_active 1 "ON" 0 "OFF" ;
+VAL_ 1090 sig_charging_state 1 "charging" 0 "not charging" ;
+VAL_ 1481 sig_fog_light 1 "ON" 0 "OFF" ;
+VAL_ 1481 sig_low_beam 1 "ON" 0 "OFF" ;
+VAL_ 1481 sig_high_beam 1 "ON" 0 "OFF" ;
+VAL_ 1057 sig_gear_mode 3 "D" 2 "N" 1 "R" 0 "P" ;
+VAL_ 0 sig_mil 1 "ON" 0 "OFF" ;
+

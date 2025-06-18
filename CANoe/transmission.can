@@ -1,0 +1,23 @@
+/*@!Encoding:949*/
+includes
+{
+  
+}
+
+variables
+{
+  msTimer sendTimer;
+  message PCAN::Transmission_Info_ECU transmission_info_msg;
+}
+
+on start 
+{
+  setTimerCyclic(sendTimer,100); 
+}
+
+on timer sendTimer
+{
+  transmission_info_msg.sig_gear_mode = @sysvar::Transmission::gear;
+  
+}
+

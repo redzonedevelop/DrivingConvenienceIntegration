@@ -1,0 +1,32 @@
+/*@!Encoding:949*/
+includes
+{
+  
+}
+
+variables
+{
+  int steering;
+  int threshold = 30;
+  
+}
+
+on message BODY::Steering_Angle_Info_ECU
+{
+  if(this.sig_steering_angle>threshold)
+  {
+    @sysvar::Light::corner_light_left = 1;
+    @sysvar::Light::corner_light_right = 0;
+  }
+  else if(this.sig_steering_angle<(-1*threshold))
+  {
+    @sysvar::Light::corner_light_right = 1;
+    @sysvar::Light::corner_light_left = 0;
+  }
+  else
+  {
+    @sysvar::Light::corner_light_left = 0;
+    @sysvar::Light::corner_light_right = 0;
+  }
+  
+}
