@@ -66,9 +66,11 @@ BO_ 1090 Battery_Info_Cluster: 2 Master
  SG_ sig_battery_level : 0|8@1- (1,0) [0|100] ""  Cluster
 
 BO_ 1481 Light_Info_Cluster: 1 Master
- SG_ sig_fog_light : 2|1@1- (1,0) [0|0] ""  Cluster
- SG_ sig_low_beam : 1|1@1- (1,0) [0|0] ""  Cluster
- SG_ sig_high_beam : 0|1@1- (1,0) [0|0] ""  Cluster
+ SG_ sig_drive_mode : 1|2@1+ (1,0) [0|3] ""  Cluster
+ SG_ sig_rain_road : 3|1@1+ (1,0) [0|1] ""  Cluster
+ SG_ sig_fog_light : 5|1@1- (1,0) [0|0] ""  Cluster
+ SG_ sig_low_beam : 0|1@1- (1,0) [0|0] ""  Cluster
+ SG_ sig_high_beam : 4|1@1- (1,0) [0|0] ""  Cluster
 
 BO_ 1219 Steering_Angle_Info_ECU: 1 Master
  SG_ sig_steering_angle : 0|8@1- (1,0) [0|0] "" Vector__XXX
@@ -161,20 +163,20 @@ BA_DEF_DEF_  "GenMsgCycleTimeFast" 20;
 BA_DEF_DEF_  "GenMsgILSupport" "Yes";
 BA_DEF_DEF_  "GenMsgFastOnStart" 0;
 BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
-BA_ "BusType" "CAN";
 BA_ "DatabaseVersion" "1.1";
-BA_ "GenMsgCycleTime" BO_ 1445 100;
+BA_ "BusType" "CAN";
 BA_ "GenMsgSendType" BO_ 1445 0;
-BA_ "GenMsgCycleTime" BO_ 1090 100;
+BA_ "GenMsgCycleTime" BO_ 1445 100;
 BA_ "GenMsgSendType" BO_ 1090 0;
-BA_ "GenMsgCycleTime" BO_ 1481 100;
+BA_ "GenMsgCycleTime" BO_ 1090 100;
 BA_ "GenMsgSendType" BO_ 1481 0;
-BA_ "GenMsgCycleTime" BO_ 1219 5;
+BA_ "GenMsgCycleTime" BO_ 1481 100;
 BA_ "GenMsgSendType" BO_ 1219 0;
-BA_ "GenMsgCycleTime" BO_ 1057 100;
+BA_ "GenMsgCycleTime" BO_ 1219 5;
 BA_ "GenMsgSendType" BO_ 1057 0;
-BA_ "GenMsgCycleTime" BO_ 1024 5;
+BA_ "GenMsgCycleTime" BO_ 1057 100;
 BA_ "GenMsgSendType" BO_ 1024 0;
+BA_ "GenMsgCycleTime" BO_ 1024 5;
 BA_ "GenMsgCycleTime" BO_ 1575 0;
 BA_ "GenMsgCycleTime" BO_ 1574 0;
 BA_ "GenMsgCycleTime" BO_ 549 0;

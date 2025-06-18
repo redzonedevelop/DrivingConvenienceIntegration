@@ -1,4 +1,4 @@
-/*@!Encoding:949*/
+/*@!Encoding:949*/ 
 includes
 {
   
@@ -8,7 +8,37 @@ variables
 {
   int steering;
   int threshold = 30;
-  
+  timer sendTimer100;
+  message BODY::Light_Info_Cluster light_info_msg;
+}
+on start
+{
+  setTimerCyclic(sendTimer100, 100); 
+}
+
+on timer sendTimer100
+{
+  if(@sysvar::Light::light_active ==1)
+  {
+    light_info_msg.sig_low_beam = 1;
+    if(@sysvar::Motor::longitudinal_speed <50) 
+    {
+      light_info_msg.sig_drive_mode = 0;
+      light_info_msg.sig_high_beam = 0;
+    }
+    else if(@sysvar::Motor::longitudinal_speed >50 && @sysvar::Motor::longitudinal_speed <100) 
+    {
+      light_info_msg.sig_drive_mode = 1;
+      light_info_msg.sig_high_beam = 1;
+    }
+    else 
+    {
+      light_info_msg.sig_drive_mode = 2;
+      light_info_msg.sig_high_beam = 1;
+    }
+    light_info_msg.sig_fog_light = @sysvar::Light::fog_active;
+    
+  }
 }
 
 on message BODY::Steering_Angle_Info_ECU
@@ -30,3 +60,5 @@ on message BODY::Steering_Angle_Info_ECU
   }
   
 }
+
+

@@ -1,4 +1,4 @@
-/*@!Encoding:949*/
+/*@!Encoding:949*/ 
 includes
 {
   
@@ -12,10 +12,10 @@ variables
 
 on message PCAN::ADAS_Control_Motor
 {
-  motor_info_oc_msg.sig_car_speed = @sysvar::Motor::longitudinal_speed;
-  if(@sysvar::Transmission::gear<3)
+  motor_info_oc_msg.sig_car_speed = this.sig_control_speed;
+  if(@sysvar::Transmission::gear<1)
   {
-    @sysvar::Transmission::gear = 3;
+    @sysvar::Transmission::gear = 1;
   }
   
   output(motor_info_oc_msg);
