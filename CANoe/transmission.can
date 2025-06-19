@@ -1,4 +1,4 @@
-/*@!Encoding:949*/
+/*@!Encoding:949*/ 
 includes
 {
   
@@ -22,5 +22,7 @@ on start
 on timer sendTimer
 {
   transmission_info_msg.sig_gear_mode = @sysvar::Transmission::gear;
-}
 
+  output(transmission_info_msg); 
+
+}

@@ -5,6 +5,8 @@ includes
 }
 
 
+
+
 variables
 {
   //P-CAN
@@ -141,13 +143,4 @@ on message ADASCAN::ADAS_Request_OBD
 
 //OTA-CAN
 //OC-CAN
-
-
-
-
-
-
-
-
-
 
