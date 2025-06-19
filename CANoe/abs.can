@@ -6,7 +6,7 @@ includes {
 variables {
   //send message
   message ABS_Info_Cluster abs_msg;
-
+  message ABS_Alive abs_alive_msg;
   //timer
   msTimer t_abs;
 
@@ -27,7 +27,7 @@ variables {
 }
 
 on start {
-  setTimerCyclic(t_abs, 5); // 5ms 주기 ABS 판단 시작
+  //setTimerCyclic(t_abs, 5); // 5ms 주기 ABS 판단 시작
 }
 
 // 속도 수신 (km/h)
@@ -59,11 +59,14 @@ on timer t_abs {
   }
 
   // 상태 변화 시 메시지 전송
-  abs_msg.sig_abs_active = abs_active;  // 0 or 1
-  output(abs_msg);
-  abs_prev = abs_active;
-
+  if (abs_active != abs_prev) {
+    abs_msg.sig_abs_active = abs_active;  // 0 or 1
+    output(abs_msg);
+    abs_prev = abs_active;
+  }
 
   // 다음 주기 준비
   prev_speed = cur_speed;
+  
+  output(abs_alive_msg);
 }
