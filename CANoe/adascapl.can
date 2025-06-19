@@ -22,32 +22,33 @@ on start
 
 on timer sendTimer10
 {
-
-
-  //int steeringValue;
-
-  //steeringValue = @sysvar::Steering::control_steering;
-
-  steering_msg.sig_control_steering = @sysvar::Steering::control_steering;
-  motor_msg.sig_control_accerleration = @sysvar::Motor::longitudinal_speed;
-
-
   
-  //msg.id = 0x11;
-  //msg.dlc = 2; // signed int는 2 byte (16bit)
-  //msg.byte(0) = steeringValue >> 8;
-  //msg.byte(1) = steeringValue;
-
-  //write("Steering = %d, accel = %d", @sysvar::Steering::control_steering,@sysvar::Motor::longitudinal_speed);
-  output(motor_msg);
+  
+  steering_msg.sig_control_steering = @sysvar::Steering::adas_control_steering;
+  @sysvar::Steering::control_steering = @sysvar::Steering::adas_control_steering;
   output(steering_msg);
+  if(@sysvar::Motor::adas_control_speed >0)
+  {
+    motor_msg.sig_control_accerleration = @sysvar::Motor::adas_control_speed;
+    @sysvar::Motor::longitudinal_speed = @sysvar::Motor::adas_control_speed;
+    output(motor_msg);
+  }
   
 }
 
 on timer sendTimer100
 {
-  adas_info_msg.sig_ACC = 1;
-  adas_info_msg.sig_LKA = 1;
+  if(@sysvar::Motor::adas_control_speed>0)
+  {
+    adas_info_msg.sig_ACC = 1;
+    adas_info_msg.sig_LKA = 1;//adas 가 안켜져있을때도 속도를 조절하면 acc가 켜지는 문제 
+  }
+  else
+  {
+    adas_info_msg.sig_ACC = 0;
+    adas_info_msg.sig_LKA = 0;
+  }
+  
   
   output(adas_info_msg);
 }

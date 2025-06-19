@@ -10,16 +10,16 @@ variables
   message PCAN::Transmission_Info_ECU transmission_info_msg;
   
   //timer
-  msTimer sendTimer;
+  msTimer sendTimer100;
   
 }
 
 on start 
 {
-  setTimerCyclic(sendTimer,100); 
+  setTimerCyclic(sendTimer100,100); 
 }
 
-on timer sendTimer
+on timer sendTimer100
 {
   transmission_info_msg.sig_gear_mode = @sysvar::Transmission::gear;
 
