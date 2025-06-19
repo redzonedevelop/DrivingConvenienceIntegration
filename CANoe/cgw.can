@@ -41,9 +41,9 @@ on message PCAN::Transmission_Info_ECU
 
 on message PCAN::Battery_Info_Cluster
 {
-  battery_info_oc_msg.sig_battery_level      = this.sig_battery_level;
-  battery_info_oc_msg.sig_charging_state     = this.sig_charging_state;
-  battery_info_oc_msg.sig_regen_brake_active = this.sig_regen_brake_active;
+  battery_info_oc_msg.sig_battery_level   = this.sig_battery_level;
+  battery_info_oc_msg.sig_charging_state  = this.sig_charging_state;
+  output(battery_info_oc_msg);
 }
 
 on message PCAN::Motor_Info_ECU

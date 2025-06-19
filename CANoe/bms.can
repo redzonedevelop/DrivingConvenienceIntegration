@@ -1,16 +1,30 @@
 /*@!Encoding:949*/
 includes
 {
-  //send message
 
+}
+
+variables
+{
+  //send message
+  message Battery_Info_Cluster battery_info_msg;
+  
   //timer
+  msTimer t_bms;
   
   //var
   
 }
 
-variables
+on start
 {
-  
+  setTimerCyclic(t_bms, 100);
 }
 
+on timer t_bms
+{
+  battery_info_msg.sig_battery_level = 3;
+  battery_info_msg.sig_charging_state = @sysvar::BMS::battery_charging_state;
+  
+  output(battery_info_msg);
+}

@@ -33,15 +33,15 @@ NS_ :
 
 BS_:
 
-BU_: ABS Brake Steering Master
+BU_: ABS_Slave ABS Brake Steering Master
 
 
 BO_ 515 OBD_Neg_Respond_OBD: 2 Master
- SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS
- SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS
+ SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
 
 BO_ 514 OBD_Pos_Respond_OBD: 1 Master
- SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
 
 BO_ 1671 VUM_File_Steering: 1 Master
  SG_ sig_payload : 0|8@1+ (1,0) [0|255] ""  Steering
@@ -50,23 +50,23 @@ BO_ 1670 VUM_File_Brake: 1 Master
  SG_ sig_payload : 0|8@1+ (1,0) [0|255] ""  Brake
 
 BO_ 1669 VUM_File_ABS: 1 Master
- SG_ sig_payload : 0|8@1+ (1,0) [0|255] ""  ABS
+ SG_ sig_payload : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,ABS
 
 BO_ 1665 VUM_Metadata_ECU: 1 Master
- SG_ sig_metadata : 0|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS
+ SG_ sig_metadata : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
 
 BO_ 1664 VUM_Request_ECU: 1 Master
- SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
 
 BO_ 1282 ADAS_Control_Steering: 2 Master
  SG_ sig_control_steering : 0|10@1- (1,0) [-512|511] "radian"  Steering
 
 BO_ 1024 Motor_Info_ECU: 5 Master
- SG_ sig_wheel_speed_RR : 32|8@1+ (1,0) [0|255] "km/h"  ABS
- SG_ sig_wheel_speed_RL : 24|8@1+ (1,0) [0|255] "km/h"  ABS
- SG_ sig_wheel_speed_FR : 16|8@1+ (1,0) [0|255] "km/h"  ABS
- SG_ sig_wheel_speed_FL : 8|8@1+ (1,0) [0|255] "km/h"  ABS
- SG_ sig_car_speed : 0|8@1+ (1,0) [0|255] "km/h"  ABS
+ SG_ sig_wheel_speed_RR : 32|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
+ SG_ sig_wheel_speed_RL : 24|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
+ SG_ sig_wheel_speed_FR : 16|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
+ SG_ sig_wheel_speed_FL : 8|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
+ SG_ sig_car_speed : 0|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
 
 BO_ 259 ADAS_Control_Brake: 1 Master
  SG_ sig_control_aeb : 0|1@1+ (1,0) [0|1] "flag"  Brake
@@ -111,12 +111,16 @@ BO_ 130 AEB_Info_ECU: 1 Brake
  SG_ sig_aeb_active : 0|1@1+ (1,0) [0|1] "flag"  Master
 
 BO_ 128 Brake_Control_ECU: 1 Brake
- SG_ sig_brake_pressed : 7|1@1+ (1,0) [0|1] "flag"  ABS,Master
- SG_ sig_brake_level : 0|7@1+ (1,0) [0|127] "%"  ABS,Master
+ SG_ sig_brake_pressed : 7|1@1+ (1,0) [0|1] "flag"  ABS_Slave,ABS,Master
+ SG_ sig_brake_level : 0|7@1+ (1,0) [0|127] "%"  ABS_Slave,ABS,Master
 
 BO_ 1185 ABS_Info_Cluster: 1 ABS
  SG_ sig_abs_active : 0|1@1+ (1,0) [0|1] "flag"  Master
 
+BO_TX_BU_ 1195 : ABS_Slave,ABS;
+BO_TX_BU_ 1194 : ABS_Slave,ABS;
+BO_TX_BU_ 166 : ABS_Slave,ABS;
+BO_TX_BU_ 1185 : ABS_Slave,ABS;
 
 
 BA_DEF_  "MultiplexExtEnabled" ENUM  "No","Yes";

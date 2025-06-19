@@ -20,12 +20,13 @@ on timer sendTimer
 
   message ADASCAN::ADAS_Control_Steering steering_msg;
   message ADASCAN::ADAS_Control_Motor motor_msg;
+  message ADASCAN::ADAS_Control_Brake brake_msg;
   //int steeringValue;
-
   //steeringValue = @sysvar::Steering::control_steering;
 
   steering_msg.sig_control_steering = @sysvar::Steering::control_steering;
   motor_msg.sig_control_accerleration = @sysvar::Motor::control_acceleration;
+  //brake_msg.sig_control_aeb = @sysvar::
 
 
   
