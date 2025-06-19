@@ -88,6 +88,8 @@ on message BODY::Light_Info_Cluster
   light_info_oc_msg.sig_fog_light  = this.sig_fog_light;
   light_info_oc_msg.sig_high_beam  = this.sig_high_beam;
   light_info_oc_msg.sig_low_beam   = this.sig_low_beam;
+  light_info_oc_msg.sig_drive_mode = this.sig_drive_mode;
+  light_info_oc_msg.sig_rain_road = this.sig_rain_road;
   
   output(light_info_oc_msg);
 }

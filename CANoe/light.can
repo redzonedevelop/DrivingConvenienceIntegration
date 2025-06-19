@@ -8,16 +8,17 @@ variables
 {
   int steering;
   int threshold = 30;
-  timer sendTimer100;
+  msTimer sendTimer100a;
   message BODY::Light_Info_Cluster light_info_msg;
 }
 on start
 {
-  setTimerCyclic(sendTimer100, 100); 
+  setTimerCyclic(sendTimer100a, 100); 
 }
 
-on timer sendTimer100
+on timer sendTimer100a
 {
+  
   if(@sysvar::Light::light_active ==1)
   {
     light_info_msg.sig_low_beam = 1;
@@ -37,8 +38,18 @@ on timer sendTimer100
       light_info_msg.sig_high_beam = 1;
     }
     light_info_msg.sig_fog_light = @sysvar::Light::fog_active;
-    
+    output(light_info_msg);
   }
+  else
+  {
+    light_info_msg.sig_low_beam = 0;
+    light_info_msg.sig_high_beam = 0;
+    output(light_info_msg);
+  }
+  
+  
+  write("light_active = %d fog_active = %d high = %d low = %d",@sysvar::Light::light_active,light_info_msg.sig_fog_light,light_info_msg.sig_high_beam,light_info_msg.sig_low_beam);
+  
 }
 
 on message BODY::Steering_Angle_Info_ECU
