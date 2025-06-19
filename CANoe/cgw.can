@@ -37,18 +37,28 @@ variables
 
 
 //P-CAN
-on message PCAN::Transmission_Info_ECU
-{
-  transmission_info_oc_msg.sig_gear_mode = this.sig_gear_mode;
-  
-  output(transmission_info_oc_msg);
-}
-
 on message PCAN::Battery_Info_Cluster
 {
   battery_info_oc_msg.sig_battery_level   = this.sig_battery_level;
   battery_info_oc_msg.sig_charging_state  = this.sig_charging_state;
   output(battery_info_oc_msg);
+}
+
+
+
+on message PCAN::BMS_Neg_Respond_OTA
+{
+  
+}
+
+on message PCAN::BMS_Pos_Respond_OTA
+{
+  
+}
+
+on message PCAN::BMS_Request_OBD
+{
+  
 }
 
 on message PCAN::Motor_Info_ECU
@@ -68,18 +78,49 @@ on message PCAN::Motor_Info_ECU
   output(motor_info_c_msg);
   output(motor_info_oc_msg);
 }
-//C-CAN
-on message C_CAN::Steering_Angle_Info_ECU
+
+on message PCAN::Motor_Neg_Respond_OTA
 {
-  steering_info_b_msg.sig_steering_angle = this.sig_steering_angle;
-  output(steering_info_b_msg);
-}
-on message CCAN::Brake_Control_ECU
-{
-  brake_control_p_msg.sig_brake_pressed =  this.sig_brake_pressed;
-  brake_control_p_msg.sig_brake_level = this.sig_brake_level;
   
-  output(brake_control_p_msg);
+}
+
+on message PCAN::Motor_Pos_Respond_OTA
+{
+  
+}
+
+on message PCAN::Motor_Request_OBD
+{
+  
+}
+
+on message PCAN::Transmission_Info_ECU
+{
+  transmission_info_oc_msg.sig_gear_mode = this.sig_gear_mode;
+  
+  output(transmission_info_oc_msg);
+}
+
+on message Transmission_Neg_Respond_OTA
+{
+  
+}
+
+on message Transmission_Pos_Respond_OTA
+{
+  
+}
+
+on message Transmission_Request_OBD
+{
+  
+}
+
+
+//C-CAN
+on message CCAN::ABS_Alive
+{
+
 }
 
 on message CCAN::ABS_Info_Cluster
@@ -88,7 +129,98 @@ on message CCAN::ABS_Info_Cluster
   output(abs_info_oc_msg);
 }
 
+on message CCAN::ABS_Neg_Respond_OTA
+{
+
+}
+
+on message CCAN::ABS_Pos_Respond_OTA
+{
+
+}
+
+on message CCAN::ABS_Request_OBD
+{
+
+}
+
+on message CCAN::ABS_Slave_Active
+{
+
+}
+
+on message CCAN::AEB_Info_ECU
+{
+
+}
+
+on message CCAN::Brake_Control_ECU
+{
+  brake_control_p_msg.sig_brake_pressed =  this.sig_brake_pressed;
+  brake_control_p_msg.sig_brake_level = this.sig_brake_level;
+  
+  output(brake_control_p_msg);
+}
+
+on message CCAN::Brake_Neg_Respond_OTA
+{
+
+}
+
+on message CCAN::Brake_Pos_Respond_OTA
+{
+
+}
+
+on message CCAN::Brake_Request_OBD
+{
+
+}
+
+on message CCAN::Steering_Angle_Info_ECU
+{
+  steering_info_b_msg.sig_steering_angle = this.sig_steering_angle;
+  output(steering_info_b_msg);
+}
+
+on message CCAN::Steering_Neg_Respond_OTA
+{
+
+}
+
+on message CCAN::Steering_Pos_Respond_OTA
+{
+
+}
+
+on message CCAN:: Steering_Request_OBD
+{
+
+}
+
+
+
 //B-CAN
+on message BODY::Illuminate_Info_Cluster
+{
+
+}
+
+on message BODY::Illuminate_Neg_Respond_OTA
+{
+
+}
+
+on message BODY::Illuminate_Pos_Respond_OTA
+{
+
+}
+
+on message BODY::Illuminate_Request_OBD
+{
+
+}
+
 on message BODY::Light_Info_Cluster
 {
   light_info_oc_msg.sig_fog_light  = this.sig_fog_light;
@@ -100,12 +232,59 @@ on message BODY::Light_Info_Cluster
   output(light_info_oc_msg);
 }
 
+on message BODY::Light_Neg_Respond_OTA
+{
+
+}
+
+on message BODY::Light_Pos_Respond_OTA
+{
+
+}
+
+on message BODY::Light_Request_OBD
+{
+
+}
+
+on message BODY::Rain_Neg_Repond_OTA
+{
+
+}
+
+on message BODY::Rain_Pos_Respond_OTA
+{
+
+}
+
+on message BODY::Rain_Request_OBD
+{
+
+}
+
+on message BODY::Seat_Neg_Respond_OTA
+{
+
+}
+
+on message BODY::Seat_Pos_Respond_OTA
+{
+
+}
+
+on message BODY::Seat_Request_OBD
+{
+
+}
+
 on message BODY::Steering_Angle_Info_ECU
 {
   steering_angle_oc_msg.sig_steering_angle = this.sig_steering_angle;
   
   output(steering_angle_oc_msg);
 }
+
+
 //ADAS-CAN
 on message ADASCAN::ADAS_Control_Brake
 {
@@ -152,8 +331,10 @@ on message ADASCAN::ADAS_Request_OBD
 
 
 //OTA-CAN
-//OC-CAN
 
+
+
+//OC-CAN
 on message OCCAN::Cluster_Neg_Respond_OTA
 {
   
