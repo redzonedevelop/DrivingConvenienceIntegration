@@ -23,11 +23,18 @@ variables {
   float v2;
   float tmp1;
   float tmp2;
+  
+  int alive_ABS = 0;
 
 }
 
 on start {
   setTimerCyclic(t_abs, 5); // 5ms 주기 ABS 판단 시작
+}
+
+on message ABS_Info_Cluster
+{
+  alive_ABS=0;
 }
 
 // 속도 수신 (km/h)

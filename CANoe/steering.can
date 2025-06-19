@@ -1,11 +1,36 @@
 /*@!Encoding:949*/
 includes
 {
-  
 }
 
 variables
 {
+  //send message
+  message C_CAN::Steering_Angle_Info_ECU steering_info_msg;
   
+  //timer
+  msTimer t_steering;
+
+  //var
+  int cur_steering_angle = 0;
 }
 
+on start
+{
+  setTimerCyclic(t_steering, 5); 
+}
+
+on timer t_steering
+{
+  steering_info_msg.sig_steering_angle = @sysvar::Steering::control_steering;
+
+  output(steering_info_msg);
+}
+
+on message C_CAN::ADAS_Control_Steering
+{
+   @sysvar::Steering::control_steering =  this.sig_control_steering;
+   steering_info_msg.sig_steering_angle = @sysvar::Steering::control_steering;
+  
+  output(steering_info_msg);
+}

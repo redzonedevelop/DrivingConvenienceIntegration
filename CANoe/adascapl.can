@@ -22,10 +22,10 @@ on start
 
 on timer sendTimer10
 {
-  
-  
+
   steering_msg.sig_control_steering = @sysvar::Steering::adas_control_steering;
   @sysvar::Steering::control_steering = @sysvar::Steering::adas_control_steering;
+
   output(steering_msg);
   if(@sysvar::Motor::adas_control_speed >0)
   {
@@ -41,7 +41,7 @@ on timer sendTimer100
   if(@sysvar::Motor::adas_control_speed>0)
   {
     adas_info_msg.sig_ACC = 1;
-    adas_info_msg.sig_LKA = 1;//adas °¡ ¾ÈÄÑÁ®ÀÖÀ»¶§µµ ¼Óµµ¸¦ Á¶ÀýÇÏ¸é acc°¡ ÄÑÁö´Â ¹®Á¦ 
+    adas_info_msg.sig_LKA = 1;//adas ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ accï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 
   }
   else
   {
