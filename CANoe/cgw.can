@@ -17,6 +17,7 @@ variables
   message CCAN::Motor_Info_ECU motor_info_c_msg;
   message CCAN::ADAS_Control_Steering steering_control_c_msg;
   //B-CAN
+  message BODY::Steering_Angle_Info_ECU steering_info_b_msg;
   //ADAS-CAN
   
   //OTA-CAN
@@ -66,6 +67,11 @@ on message PCAN::Motor_Info_ECU
   output(motor_info_oc_msg);
 }
 //C-CAN
+on message C_CAN::Steering_Angle_Info_ECU
+{
+  steering_info_b_msg.sig_steering_angle = this.sig_steering_angle;
+  output(steering_info_b_msg);
+}
 on message CCAN::Brake_Control_ECU
 {
   brake_control_p_msg.sig_brake_pressed =  this.sig_brake_pressed;
@@ -146,3 +152,43 @@ on message ADASCAN::ADAS_Request_OBD
 //OTA-CAN
 //OC-CAN
 
+on message OCCAN::Cluster_Neg_Respond_OTA
+{
+  
+}
+
+on message OCCAN::Cluster_Pos_Respond_OTA
+{
+  
+}
+
+on message OCCAN::Cluster_Request_OBD
+{
+  
+}
+
+on message OCCAN::OBD_MIL_Cluster
+{
+  
+}
+
+on message OCCAN::OBD_Neg_Respond_OBD
+{
+  
+}
+
+
+on message OCCAN::OBD_Neg_Respond_OTA
+{
+  
+}
+
+on message OCCAN::OBD_Pos_Respond_OBD
+{
+  
+}
+
+on message OCCAN::OBD_Pos_Respond_OTA
+{
+  
+}

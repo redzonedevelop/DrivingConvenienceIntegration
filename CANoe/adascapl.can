@@ -22,12 +22,13 @@ on start
 
 on timer sendTimer10
 {
-
+  if(@sysvar::Steering::adas_control_steering !=0)
+  {
   steering_msg.sig_control_steering = @sysvar::Steering::adas_control_steering;
   @sysvar::Steering::control_steering = @sysvar::Steering::adas_control_steering;
-
   output(steering_msg);
-  if(@sysvar::Motor::adas_control_speed >0)
+  }
+    if(@sysvar::Motor::adas_control_speed >0)
   {
     motor_msg.sig_control_accerleration = @sysvar::Motor::adas_control_speed;
     @sysvar::Motor::longitudinal_speed = @sysvar::Motor::adas_control_speed;
