@@ -36,6 +36,12 @@ BS_:
 BU_: ABS_Slave ABS Brake Steering Master
 
 
+BO_ 126 ABS_Slave_Active: 1 ABS_Slave
+ SG_ sig_abs_slave_active : 0|1@1- (1,0) [0|0] ""  Master
+
+BO_ 596 ABS_Alive: 1 ABS
+ SG_ sig_abs_alive : 0|1@1- (1,0) [0|0] ""  ABS_Slave
+
 BO_ 515 OBD_Neg_Respond_OBD: 2 Master
  SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
  SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
