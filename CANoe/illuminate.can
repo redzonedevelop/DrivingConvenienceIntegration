@@ -1,0 +1,18 @@
+/*@!Encoding:949*/
+includes
+{
+  
+}
+
+variables
+{
+  message Illuminate_Pos_Respond_OTA illuminate_pos_msg;
+}
+
+on message BODY::VUM_Request_ECU
+{
+  illuminate_pos_msg.sig_sid = this.sig_sid+0x40;
+  output(illuminate_pos_msg);
+  
+  //negative
+}

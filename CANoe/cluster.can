@@ -1,0 +1,18 @@
+/*@!Encoding:949*/
+includes
+{
+  
+}
+
+variables
+{
+  message Cluster_Pos_Respond_OTA cluster_pos_msg;
+}
+
+on message OCCAN::VUM_Request_ECU
+{
+  cluster_pos_msg.sig_sid = this.sig_sid+0x40;
+  output(cluster_pos_msg);
+  
+  //negative
+}

@@ -1,0 +1,383 @@
+/*@!Encoding:1252*/
+variables
+{
+  UdpSocket gSocket;
+  byte      gRxBuffer[1500];
+  byte      gTxBuffer[1500];
+  byte      gPayload[1500];
+  byte      gMetadata[1500];
+  
+  msTimer send_loop;
+  msTimer req_user_approve;
+  msTimer req_update_mode;
+  int receive_flag = 0;
+  
+  int fullLength = 0;
+  int chunkSize = 252;
+  int offset = 0;
+  
+  //states
+  const int STATE_USER_APPROVE = 0;
+  const int STATE_UPDATE_MODE = 1;
+  const int STATE_INSTALL_APPROVE = 2;
+  const int STATE_SEND_METADATA = 3;
+  const int STATE_SEND_PAYLOAD = 4;
+  const int STATE_VERIFICATION = 5;
+  const int STATE_ROLLBACK = 6;
+  const int STATE_END = 7;
+  
+  int user_approve_flag = 0;
+  
+  int cur_state = STATE_USER_APPROVE;
+}
+
+void send_message(){
+  byte buf[10];
+  dword crc;
+  int i;
+  
+  switch(cur_state)
+  {
+    case STATE_SEND_METADATA:
+      gMetadata[0] = 0x13;
+      gMetadata[1] = 'd';
+      gMetadata[2] = 'u';
+      gMetadata[3] = 'm';
+      gMetadata[4] = 'm';
+      gMetadata[5] = 'y';
+      
+      crc = calcCRC32(gMetadata, 6);
+  
+      gMetadata[6] = (crc >> 24) & 0xFF;
+      gMetadata[7] = (crc >> 16) & 0xFF;
+      gMetadata[8] = (crc >> 8) & 0xFF;
+      gMetadata[9] = crc & 0xFF;
+      
+      memcpy_off(gTxBuffer, 0, gMetadata, 0, 10);
+      
+      gSocket.SendTo( IP_Endpoint(192.168.1.1:40001), gTxBuffer, 10 );
+      break;    
+  }
+}
+
+//update led on
+on timer req_user_approve{
+  @sysvar::vum::update_message = 1;
+  user_approve_flag = 0;
+}
+
+// update yes -> update mode
+on sysvar_update sysvar::vum::update_yes_button{
+  if(@this == 1 && cur_state == STATE_USER_APPROVE){
+    write("update_button_pressed");
+    cur_state = STATE_UPDATE_MODE;
+    setTimerCyclic(req_update_mode, 100);
+  }
+}
+
+// update no -> end
+on sysvar_update sysvar::vum::update_no_button{
+  if(@this == 1 && cur_state == STATE_USER_APPROVE){
+    cur_state = STATE_END;
+    @sysvar::vum::update_message = 0;
+  }
+}
+
+// STATE_USER_APPROVE
+
+// ask user update or not
+on timer req_update_mode{
+  if(cur_state == STATE_UPDATE_MODE){
+    byte buf[10];
+    dword crc;
+    
+    buf[0] = 0x12;
+    
+    crc = calcCRC32(buf, 1);
+    
+    buf[1] = (crc >> 24) & 0xFF;
+    buf[2] = (crc >> 16) & 0xFF;
+    buf[3] = (crc >> 8) & 0xFF;
+    buf[4] = crc & 0xFF;
+  
+    gSocket.SendTo( IP_Endpoint(192.168.1.1:40001), buf, 5 );
+  }
+}
+
+// STATE_UPDATE_MODE
+
+void req_install_approve(){
+  @sysvar::vum::install_message = 1;
+}
+
+// install yes -> send metadata
+on sysvar_update sysvar::vum::install_yes_button{
+  if(@this == 1 && cur_state == STATE_INSTALL_APPROVE){
+    write("install button pressed");
+    cur_state = STATE_SEND_METADATA;
+    send_metadata();
+  }
+}
+
+// install no -> end
+on sysvar_update sysvar::vum::install_no_button{
+  if(@this == 1 && cur_state == STATE_INSTALL_APPROVE){
+    cur_state = STATE_END;
+    @sysvar::vum::update_message = 0;
+    @sysvar::vum::install_message = 0;
+  }
+}
+
+// INSTALL APPROVE STATE
+
+void send_metadata(){
+  send_message();
+}
+
+void send_payload(){
+}
+
+void verity(){
+}
+
+void roll_back(){
+}
+
+on start
+{
+  // Open an UDP socket. As source address 0.0.0.0 is used, this means that
+  // the configure address of the TCP/IP stack is used. See TCP/IP stack
+  // configuration dialog in the simulation setup
+  // As port no ist used, this means a source port is dynamically assign
+  // by the TCP/IP stack.
+  
+  gSocket = UdpSocket::Open( IP_Endpoint(0.0.0.0:40001) );
+   
+  if (IpGetLastError() != 0)
+  {
+    // if UdpSocket::Open fails, we print a message to the write window
+    write( "<%BASE_FILE_NAME%> UdpSocket::Open failed with result %d", IpGetLastError() );
+  }
+    
+  // To receive data with the created socket, we have to call ReceiveFrom.
+  gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
+    
+  // if ReceiveFrom does not immediatelly copy to to gRxBuffer, it returns 997 to
+  // indicate it will call the callback function OnUdpReceiveFrom later.
+  if ((gSocket.GetLastSocketError() != 0) && (gSocket.GetLastSocketError()  != 997))
+  {
+    char errorString[100];
+    // if ReceiveFrom fails, we print a message to the write window
+    gSocket.GetLastSocketErrorAsString( errorString, elcount(errorString) );
+    write( "<%BASE_FILE_NAME%> ReceiveFrom failed with result %d (%s)", IpGetLastError(), errorString );
+  }
+}
+
+dword calcCRC32(byte data[], int len)
+{
+  int i, j;
+  dword temp, crc, mask;
+  
+  i = 0;
+  crc = 0xFFFFFFFF;
+  while(i < len){
+    temp = (dword)data[i];
+    crc = crc ^ temp;
+    for (j = 7; j >= 0; j--){
+      mask = -(crc & 1);
+      crc = (crc >> 1) ^ (0xEDB88320 & mask);
+    }
+    i = i + 1;
+  }
+  return ~crc;
+}
+
+on timer send_loop
+{
+  byte chunk[256];
+  int len;
+  int i;
+  long crc;
+  
+  if (fullLength - offset >= chunkSize){
+    len = chunkSize;
+  }
+  else{
+    len = fullLength - offset;
+  }
+  
+  if (offset >= fullLength){
+    for (i = 0; i < elcount(gTxBuffer); i++) {
+      gTxBuffer[i] = 0;
+    } 
+    return;  
+  }
+    
+  for(i = 0; i < len; i++){
+    chunk[i] = gTxBuffer[offset + i];
+  }
+  
+  crc = calcCRC32(chunk, len);
+  
+  chunk[len]     = (crc >> 24) & 0xFF;
+  chunk[len + 1] = (crc >> 16) & 0xFF;
+  chunk[len + 2] = (crc >> 8) & 0xFF;
+  chunk[len + 3] = crc & 0xFF;
+
+    
+    // send text to IP address/UDP port of the receiver
+  gSocket.SendTo( IP_Endpoint(192.168.1.1:40001), chunk, len + 4 );
+  
+  write("CRC32 calculated: 0x%08X", crc);
+  
+  offset += len;
+  setTimer(send_loop, 100);
+}
+
+on preStop
+{
+  // Close socket on measurement stop
+  gSocket.Close();
+}
+
+// Callback function, which is called if a UDP packet is received
+void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, byte buffer[], dword size)
+{
+  int dataLen;
+  dword receivedCRC;
+  dword calculatedCRC;
+  
+  if(user_approve_flag == 0 && cur_state == STATE_USER_APPROVE){
+    setTimer(req_user_approve, 3000);
+    user_approve_flag = 1;
+  }
+  
+  if (result == 0)
+  {
+    char endpointString[30];
+    
+    remoteEndpoint.PrintEndpointToString( endpointString );
+
+    if (size > 4)
+    {
+      dataLen = size - 4;
+      receivedCRC = ((dword)(buffer[dataLen]     & 0XFF) << 24) | 
+                    ((dword)(buffer[dataLen + 1] & 0xFF) << 16) | 
+                    ((dword)(buffer[dataLen + 2] & 0XFF) << 8)  | 
+                    ((dword)(buffer[dataLen + 3])& 0XFF);
+      calculatedCRC = calcCRC32(buffer, dataLen);
+
+      write("Recived CRC32 = 0x%08X, Calculated CRC32 = 0x%08X", receivedCRC, calculatedCRC);
+
+      if (receivedCRC == calculatedCRC) {
+        write("CRC correct");
+      } else {
+        write("CRC miss");
+      }
+      //sysSetVariableString( sysvar::Receiver::vum_RxAddress, endpointString );
+      // sysSetVariableString( sysvar::Receiver::vum_RxText, buffer );
+    }
+    else
+    {
+      //sysSetVariableString( sysvar::Receiver::vum_RxAddress, endpointString );
+      //sysSetVariableString( sysvar::Receiver::vum_RxText, "data too short" );
+    }
+  
+  }
+  
+  // update available & ask user install or not
+  if(cur_state == STATE_UPDATE_MODE){
+    // can update
+    if(buffer[0] == 0x12){
+      write("update mode ready!");
+      cancelTimer(req_update_mode);
+      cur_state = STATE_INSTALL_APPROVE;
+      req_install_approve();
+    }
+    // can't update
+    else{
+      write("wait!");
+    }
+  }
+  else if(cur_state == STATE_SEND_METADATA){
+    // can send payload
+    if(buffer[0] == 0x13){
+      write("send payload ready");
+      cur_state = STATE_SEND_PAYLOAD;
+    }
+    // can't send payload
+    else{
+      write("wait!");
+    }
+  }
+  // To receive more data, we have to call ReceiveFrom again.
+  gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
+}
+
+/*
+on sysvar_update sysvar::Receiver::vum_Open
+{
+  // on open button down...
+  if (@this == 1)
+  {
+    // Open an UDP socket. As source address 0.0.0.0 is used, this means that
+    // the configure address of the TCP/IP stack is used. See TCP/IP stack
+    // configuration dialog in the simulation setup
+    // On UDP port 40001 we want to receive UDP pacekts.
+    gSocket = UdpSocket::Open( IP_Endpoint(0.0.0.0:40001) );
+    
+    if (IpGetLastError() != 0)
+    {
+      // if UdpSocket::Open fails, we print a message to the write window
+      write( "<%BASE_FILE_NAME%> UdpSocket::Open failed with reauls %d", IpGetLastError() );
+      return;
+    }
+    
+    // To receive data with the created socket, we have to call ReceiveFrom.
+    gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
+    
+    // if ReceiveFrom does not immediatelly copy to to gRxBuffer, it returns 997 to
+    // indicate it will call the callback function OnUdpReceiveFrom later.
+    if ((gSocket.GetLastSocketError() != 0) && (gSocket.GetLastSocketError()  != 997))
+    {
+      char errorString[100];
+      // if ReceiveFrom fails, we print a message to the write window
+      gSocket.GetLastSocketErrorAsString( errorString, elcount(errorString) );
+      write( "<%BASE_FILE_NAME%> ReceiveFrom failed with result %d (%s)", IpGetLastError(), errorString );
+    }
+    
+    // update panel controls state
+    EnableControl( "Receiver", "OpenButton", 0 );
+    EnableControl( "Receiver", "CloseButton", 1 );
+  }
+}
+
+on sysvar_update sysvar::Receiver::vum_Close
+{
+  // on open button down...
+  if (@this == 1)
+  {
+    // Close socket
+    gSocket.Close();
+
+    // update panel controls state
+    EnableControl( "Receiver", "OpenButton", 1 );
+    EnableControl( "Receiver", "CloseButton", 0 );
+  }
+}
+
+on sysvar sysvar::Sender::vum_TxButton
+{
+  // send on button down
+  if (@this == 1)
+  {
+    char text[200];
+    
+    // get string from sysvar 
+    sysGetVariableString( sysvar::Sender::vum_TxText, text, elcount(text) );
+    
+    // send text to IP address/UDP port of the receiver
+    gSocket.SendTo( IP_Endpoint(192.168.1.1:40001), text, strlen(text) );
+  }
+}
+*/

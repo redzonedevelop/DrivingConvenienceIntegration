@@ -12,6 +12,7 @@ variables
   message ADASCAN::ADAS_Control_Steering steering_msg;
   message ADASCAN::ADAS_Control_Motor motor_msg;
   message ADASCAN::ADAS_Info_Cluster adas_info_msg;
+  message ADAS_Pos_Respond_OTA adas_pos_msg;
 }
 
 on start
@@ -52,4 +53,12 @@ on timer sendTimer100
   
   
   output(adas_info_msg);
+}
+
+on message ADASCAN::VUM_Request_ECU
+{
+  adas_pos_msg.sig_sid = this.sig_sid+0x40;
+  output(adas_pos_msg);
+  
+  //negative
 }
