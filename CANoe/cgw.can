@@ -9,20 +9,36 @@ includes
 
 variables
 {
+  UdpSocket gSocket;
+  char      gRxBuffer[1500];
+  char      gTxBuffer[1500];
+  char      gGetSysBuffer[1500];
+  msTimer send_loop;
+  
+  int fullLength = 0;
+  int chunkSize = 252;
+  int offset = 0;
+
+  
+  
   //var
   int abs_error = 0;
   //P-CAN
   message PCAN::Brake_Control_Motor brake_control_p_msg;
   message PCAN::ADAS_Control_Motor motor_control_p_msg;
+  message PCAN::VUM_Request_ECU vum_request_p_msg;
   
   //C-CAN
   message CCAN::Motor_Info_ECU motor_info_c_msg;
   message CCAN::ADAS_Control_Steering steering_control_c_msg;
+  message CCAN::VUM_Request_ECU vum_request_c_msg;
   //B-CAN
   message BODY::Steering_Angle_Info_ECU steering_info_b_msg;
+  message BODY::VUM_Request_ECU vum_request_b_msg;
   //ADAS-CAN
-  
+  message ADASCAN::VUM_Request_ECU vum_request_adas_msg;
   //OTA-CAN
+  message OTA::VUM_Request_ECU vum_request_ota_msg;
   //OC-CAN
   message OCCAN::ABS_Info_Cluster abs_info_oc_msg;
   message OCCAN::ADAS_Info_Cluster adas_info_oc_msg;
@@ -32,7 +48,39 @@ variables
   message OCCAN::Motor_Info_ECU motor_info_oc_msg;
   message OCCAN::Steering_Angle_Info_ECU steering_angle_oc_msg;
   message OCCAN::Transmission_Info_ECU transmission_info_oc_msg;
+  message OCCAN::VUM_Request_ECU vum_request_oc_msg;
 }
+
+on start
+{
+  // Open an UDP socket. As source address 0.0.0.0 is used, this means that
+  // the configure address of the TCP/IP stack is used. See TCP/IP stack
+  // configuration dialog in the simulation setup
+  // As port no ist used, this means a source port is dynamically assign
+  // by the TCP/IP stack.
+  
+  gSocket = UdpSocket::Open( IP_Endpoint(0.0.0.0:40001) );
+   
+  if (IpGetLastError() != 0)
+  {
+    // if UdpSocket::Open fails, we print a message to the write window
+    write( "<%BASE_FILE_NAME%> UdpSocket::Open failed with result %d", IpGetLastError() );
+  }
+    
+  // To receive data with the created socket, we have to call ReceiveFrom.
+  gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
+    
+  // if ReceiveFrom does not immediatelly copy to to gRxBuffer, it returns 997 to
+  // indicate it will call the callback function OnUdpReceiveFrom later.
+  if ((gSocket.GetLastSocketError() != 0) && (gSocket.GetLastSocketError()  != 997))
+  {
+    char errorString[100];
+    // if ReceiveFrom fails, we print a message to the write window
+    gSocket.GetLastSocketErrorAsString( errorString, elcount(errorString) );
+    write( "<%BASE_FILE_NAME%> ReceiveFrom failed with result %d (%s)", IpGetLastError(), errorString );
+  }
+}
+
 
 
 
@@ -330,10 +378,6 @@ on message ADASCAN::ADAS_Request_OBD
 }
 
 
-//OTA-CAN
-
-
-
 //OC-CAN
 on message OCCAN::Cluster_Neg_Respond_OTA
 {
@@ -375,3 +419,261 @@ on message OCCAN::OBD_Pos_Respond_OTA
 {
   
 }
+
+//OTA-CAN
+
+dword calcCRC32(byte data[], int len)
+{
+  int i, j;
+  dword temp, crc, mask;
+  
+  i = 0;
+  crc = 0xFFFFFFFF;
+  while(i < len){
+    temp = (dword)data[i];
+    crc = crc ^ temp;
+    for (j = 7; j >= 0; j--){
+      mask = -(crc & 1);
+      crc = (crc >> 1) ^ (0xEDB88320 & mask);
+    }
+    i = i + 1;
+  }
+  return ~crc;
+}
+
+on sysvar_update sysvar::cgw::payload{
+  
+  int metadata_len = 0;
+  int payload_len = 0; 
+  
+  offset = 0;
+  
+  sysGetVariableString( sysvar::cgw::metadata, gGetSysBuffer, elcount(gGetSysBuffer) );
+  metadata_len = strlen(gGetSysBuffer);
+  
+  memcpy_off(gTxBuffer, 0, gGetSysBuffer, 0, metadata_len);
+  
+  sysGetVariableString( sysvar::cgw::payload, gGetSysBuffer, elcount(gGetSysBuffer) );
+  payload_len = strlen(gGetSysBuffer);
+  
+  memcpy_off(gTxBuffer, metadata_len, gGetSysBuffer, 0, payload_len);
+  
+  fullLength = metadata_len + payload_len;
+  
+  setTimer(send_loop, 100);
+}
+
+on timer send_loop
+{
+  byte chunk[256];
+  int len;
+  int i;
+  dword crc;
+  
+  if (fullLength - offset >= chunkSize){
+    len = chunkSize;
+  }
+  else{
+    len = fullLength - offset;
+  }
+  
+  if (offset >= fullLength){
+    for (i = 0; i < elcount(gTxBuffer); i++) {
+      gTxBuffer[i] = 0;
+    } 
+    return;  
+  }
+    
+  for(i = 0; i < len; i++){
+    chunk[i] = gTxBuffer[offset + i];
+  }
+  
+  crc = calcCRC32(chunk, len);
+  
+  chunk[len]     = (crc >> 24) & 0xFF;
+  chunk[len + 1] = (crc >> 16) & 0xFF;
+  chunk[len + 2] = (crc >> 8) & 0xFF;
+  chunk[len + 3] = crc & 0xFF;
+
+    
+    // send text to IP address/UDP port of the receiver
+  gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), chunk, len + 4 );
+  
+  write("CRC32 calculated: 0x%08X", crc);
+  
+  offset += len;
+  setTimer(send_loop, 100);
+}
+
+void update_mode_respond(){
+  byte buf[10];
+  dword crc;
+  
+  buf[0] = 0x12;
+  
+  crc = calcCRC32(buf, 1);
+  
+  buf[1] = (crc >> 24) & 0xFF;
+  buf[2] = (crc >> 16) & 0xFF;
+  buf[3] = (crc >> 8) & 0xFF;
+  buf[4] = crc & 0xFF;
+  
+  memcpy_off(gTxBuffer, 0, buf, 0, 5); 
+
+  gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), gTxBuffer, 5 );
+}
+
+void metadata_receive_respond(){
+  byte buf[10];
+  dword crc;
+  
+  buf[0] = 0x13;
+  
+  crc = calcCRC32(buf, 1);
+  
+  buf[1] = (crc >> 24) & 0xFF;
+  buf[2] = (crc >> 16) & 0xFF;
+  buf[3] = (crc >> 8) & 0xFF;
+  buf[4] = crc & 0xFF;
+  
+  memcpy_off(gTxBuffer, 0, buf, 0, 5); 
+
+  gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), gTxBuffer, 5 );
+}
+
+on preStop
+{
+  // Close socket on measurement stop
+  gSocket.Close();
+}
+
+// Callback function, which is called if a UDP packet is received
+void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, byte buffer[], dword size)
+{
+  int dataLen;
+  dword receivedCRC;
+  dword calculatedCRC;
+  
+  if (result == 0)
+  {
+    char endpointString[30];
+    
+    remoteEndpoint.PrintEndpointToString( endpointString );
+
+    if (size > 4)
+    {
+      dataLen = size - 4;
+      receivedCRC = ((dword)(buffer[dataLen]     & 0XFF) << 24) | 
+                    ((dword)(buffer[dataLen + 1] & 0xFF) << 16) | 
+                    ((dword)(buffer[dataLen + 2] & 0XFF) << 8)  | 
+                    ((dword)(buffer[dataLen + 3])& 0XFF);
+      calculatedCRC = calcCRC32(buffer, dataLen);
+
+      write("Recived CRC32 = 0x%08X, Calculated CRC32 = 0x%08X", receivedCRC, calculatedCRC);
+
+      if (receivedCRC == calculatedCRC) {
+        write("CRC correct");
+      } else {
+        write("CRC miss");
+      }
+      //sysSetVariableString( sysvar::Receiver::cgw_RxAddress, endpointString );
+      // sysSetVariableString( sysvar::Receiver::cgw_RxText, buffer );
+    }
+    else
+    {
+      //sysSetVariableString( sysvar::Receiver::cgw_RxAddress, endpointString );
+      // sysSetVariableString( sysvar::Receiver::cgw_RxText, "data too short" );
+    }
+  
+  }
+  
+  if(buffer[0] == 0x12){
+    
+    //todo 업데이트 모드를 모든 ecu에 뿌려주고 ecu의 pos 또는 neg respond_OTA메시지를 vum에게 다시 전송해주기
+    vum_request_adas_msg.sig_sid = 0x12;
+    output(vum_request_adas_msg);
+    vum_request_b_msg.sig_sid = 0x12;
+    output(vum_request_b_msg);
+    vum_request_c_msg.sig_sid = 0x12;
+    output(vum_request_c_msg);
+    vum_request_oc_msg.sig_sid = 0x12;
+    output(vum_request_oc_msg);
+    vum_request_p_msg.sig_sid = 0x12;
+    output(vum_request_p_msg);
+    
+    update_mode_respond();
+  }
+  else if(buffer[0] == 0x13){
+    metadata_receive_respond();
+  }
+
+  // To receive more data, we have to call ReceiveFrom again.
+  gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
+}
+
+/*on sysvar sysvar::Sender::cgw_TxButton
+{
+  // send on button down
+  if (@this == 1)
+  {
+    char text[200];
+    
+    // get string from sysvar 
+    sysGetVariableString( sysvar::Sender::cgw_TxText, text, elcount(text) );
+    
+    // send text to IP address/UDP port of the receiver
+    gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), text, strlen(text) );
+  }
+}
+
+on sysvar_update sysvar::Receiver::cgw_Open
+{
+  // on open button down...
+  if (@this == 1)
+  {
+    // Open an UDP socket. As source address 0.0.0.0 is used, this means that
+    // the configure address of the TCP/IP stack is used. See TCP/IP stack
+    // configuration dialog in the simulation setup
+    // On UDP port 40001 we want to receive UDP pacekts.
+    gSocket = UdpSocket::Open( IP_Endpoint(0.0.0.0:40001) );
+    
+    if (IpGetLastError() != 0)
+    {
+      // if UdpSocket::Open fails, we print a message to the write window
+      write( "<%BASE_FILE_NAME%> UdpSocket::Open failed with reauls %d", IpGetLastError() );
+      return;
+    }
+    
+    // To receive data with the created socket, we have to call ReceiveFrom.
+    gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
+    
+    // if ReceiveFrom does not immediatelly copy to to gRxBuffer, it returns 997 to
+    // indicate it will call the callback function OnUdpReceiveFrom later.
+    if ((gSocket.GetLastSocketError() != 0) && (gSocket.GetLastSocketError()  != 997))
+    {
+      char errorString[100];
+      // if ReceiveFrom fails, we print a message to the write window
+      gSocket.GetLastSocketErrorAsString( errorString, elcount(errorString) );
+      write( "<%BASE_FILE_NAME%> ReceiveFrom failed with result %d (%s)", IpGetLastError(), errorString );
+    }
+    
+    // update panel controls state
+    EnableControl( "Sender", "OpenButton", 0 );
+    EnableControl( "Sender", "CloseButton", 1 );
+  }
+}
+
+on sysvar_update sysvar::Receiver::cgw_Close
+{
+  // on open button down...
+  if (@this == 1)
+  {
+    // Close socket
+    gSocket.Close();
+
+    // update panel controls state
+    EnableControl( "Sender", "OpenButton", 1 );
+    EnableControl( "Sender", "CloseButton", 0 );
+  }
+}*/
+

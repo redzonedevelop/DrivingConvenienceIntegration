@@ -1,0 +1,18 @@
+/*@!Encoding:949*/
+includes
+{
+  
+}
+
+variables
+{
+  message OBD_Pos_Respond_OTA obd_pos_msg;
+}
+
+on message OCCAN::VUM_Request_ECU
+{
+  obd_pos_msg.sig_sid = this.sig_sid+0x40;
+  output(obd_pos_msg);
+  
+  //negative
+}

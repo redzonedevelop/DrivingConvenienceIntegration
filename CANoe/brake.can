@@ -8,7 +8,7 @@ variables
 {
   //send message
   message Brake_Control_ECU Brake_Control_ECU;
-  
+  message Brake_Pos_Respond_OTA brake_pos_msg;
   //timer
   msTimer t_brake;
   
@@ -41,5 +41,11 @@ on timer t_brake
   output(Brake_Control_ECU);
 }
 
-
+on message CCAN::VUM_Request_ECU
+{
+  brake_pos_msg.sig_sid = this.sig_sid+0x40;
+  output(brake_pos_msg);
+  
+  //negative
+}
 
