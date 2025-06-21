@@ -37,8 +37,8 @@ variables
   message BODY::VUM_Request_ECU vum_request_b_msg;
   //ADAS-CAN
   message ADASCAN::VUM_Request_ECU vum_request_adas_msg;
-  //OTA-CAN
-  message OTA::VUM_Request_ECU vum_request_ota_msg;
+  //OTA-CAN not exist sorry
+  
   //OC-CAN
   message OCCAN::ABS_Info_Cluster abs_info_oc_msg;
   message OCCAN::ADAS_Info_Cluster adas_info_oc_msg;
@@ -59,6 +59,22 @@ variables
   const int VERIFY = 0x15;
   const int ROLLBACK = 0x16;
   const int OTA_ERROR = 0x7F;
+  
+  // ECU NUM
+  const int Motor = 0;
+  const int Transmission = 1;
+  const int BMS = 2;
+  const int ECU_ABS = 5;
+  const int Brake = 4;
+  const int Steering = 6;
+  const int ADAS = 8;
+  const int VUM = 20;
+  const int Illuminate = 13;
+  const int Rain = 12;
+  const int Light = 14;
+  const int Seat = 15;
+  const int OBD = 16;
+  const int Cluster = 17;
 }
 
 on start
@@ -111,7 +127,18 @@ on message PCAN::BMS_Neg_Respond_OTA
 
 on message PCAN::BMS_Pos_Respond_OTA
 {
-  
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,BMS);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message PCAN::BMS_Request_OBD
@@ -144,7 +171,18 @@ on message PCAN::Motor_Neg_Respond_OTA
 
 on message PCAN::Motor_Pos_Respond_OTA
 {
-  
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,Motor);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message PCAN::Motor_Request_OBD
@@ -166,7 +204,18 @@ on message Transmission_Neg_Respond_OTA
 
 on message Transmission_Pos_Respond_OTA
 {
-  
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,Transmission);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message Transmission_Request_OBD
@@ -194,7 +243,18 @@ on message CCAN::ABS_Neg_Respond_OTA
 
 on message CCAN::ABS_Pos_Respond_OTA
 {
-
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,ECU_ABS);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message CCAN::ABS_Request_OBD
@@ -227,7 +287,18 @@ on message CCAN::Brake_Neg_Respond_OTA
 
 on message CCAN::Brake_Pos_Respond_OTA
 {
-
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,Brake);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message CCAN::Brake_Request_OBD
@@ -248,7 +319,18 @@ on message CCAN::Steering_Neg_Respond_OTA
 
 on message CCAN::Steering_Pos_Respond_OTA
 {
-
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,Steering);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message CCAN:: Steering_Request_OBD
@@ -271,7 +353,18 @@ on message BODY::Illuminate_Neg_Respond_OTA
 
 on message BODY::Illuminate_Pos_Respond_OTA
 {
-
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,Illuminate);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message BODY::Illuminate_Request_OBD
@@ -297,7 +390,18 @@ on message BODY::Light_Neg_Respond_OTA
 
 on message BODY::Light_Pos_Respond_OTA
 {
-
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,Light);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message BODY::Light_Request_OBD
@@ -312,7 +416,18 @@ on message BODY::Rain_Neg_Repond_OTA
 
 on message BODY::Rain_Pos_Respond_OTA
 {
-
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,Rain);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message BODY::Rain_Request_OBD
@@ -327,7 +442,18 @@ on message BODY::Seat_Neg_Respond_OTA
 
 on message BODY::Seat_Pos_Respond_OTA
 {
-
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,Seat);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message BODY::Seat_Request_OBD
@@ -379,7 +505,18 @@ on message ADASCAN::ADAS_Neg_Respond_OTA
 
 on message ADASCAN::ADAS_Pos_Respond_OTA
 {
-  
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,ADAS);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message ADASCAN::ADAS_Request_OBD
@@ -396,7 +533,18 @@ on message OCCAN::Cluster_Neg_Respond_OTA
 
 on message OCCAN::Cluster_Pos_Respond_OTA
 {
-  
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,Cluster);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 on message OCCAN::Cluster_Request_OBD
@@ -427,7 +575,18 @@ on message OCCAN::OBD_Pos_Respond_OBD
 
 on message OCCAN::OBD_Pos_Respond_OTA
 {
-  
+  if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
+    update_mode_respond(this.sig_sid ,OBD);
+  }
+  else if(this.sig_sid == (METADATA + 0x40)){
+    metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (VERIFY + 0x40)){
+    verification_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (ROLLBACK + 0x40)){
+    //to-do: rollback respond
+  }
 }
 
 //OTA-CAN
@@ -493,29 +652,30 @@ on timer send_loop
   setTimer(send_loop, 100);
 }
 
-void update_mode_respond(){
+void update_mode_respond(byte sid, int ECU_NUM){
   byte buf[10];
   dword crc;
   
-  buf[0] = 0x12;
+  buf[0] = sid;
+  buf[1] = ECU_NUM;
   
-  crc = calcCRC32(buf, 1);
+  crc = calcCRC32(buf, 2);
   
-  buf[1] = (crc >> 24) & 0xFF;
-  buf[2] = (crc >> 16) & 0xFF;
-  buf[3] = (crc >> 8) & 0xFF;
-  buf[4] = crc & 0xFF;
+  buf[2] = (crc >> 24) & 0xFF;
+  buf[3] = (crc >> 16) & 0xFF;
+  buf[4] = (crc >> 8) & 0xFF;
+  buf[5] = crc & 0xFF;
   
-  memcpy_off(gTxBuffer, 0, buf, 0, 5); 
+  memcpy_off(gTxBuffer, 0, buf, 0, 6); 
 
-  gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), gTxBuffer, 5 );
+  gSocket.SendTo( IP_Endpoint(192.168.1.3:40001), gTxBuffer, 6 );
 }
 
-void metadata_receive_respond(){
+void metadata_receive_respond(byte sid){
   byte buf[10];
   dword crc;
   
-  buf[0] = 0x13;
+  buf[0] = sid;
   
   crc = calcCRC32(buf, 1);
   
@@ -526,7 +686,39 @@ void metadata_receive_respond(){
   
   memcpy_off(gTxBuffer, 0, buf, 0, 5); 
 
-  gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), gTxBuffer, 5 );
+  gSocket.SendTo( IP_Endpoint(192.168.1.3:40001), gTxBuffer, 5 );
+}
+
+void payload_receive_respond(byte sid){
+  byte chunk[10];
+  dword crc;
+  
+  chunk[0] = sid;
+  
+  crc = calcCRC32(chunk, 1);
+  
+  chunk[1] = (crc >> 24) & 0xFF;
+  chunk[2] = (crc >> 16) & 0xFF;
+  chunk[3] = (crc >> 8) & 0xFF;
+  chunk[4] = crc & 0xFF;
+  
+  gSocket.SendTo( IP_Endpoint(192.168.1.3:40001), chunk, 5 );
+}
+
+void verification_receive_respond(byte sid){
+  byte chunk[5];
+  dword crc;
+  
+  chunk[0] = sid;
+  
+  crc = calcCRC32(chunk, 1);
+  
+  chunk[1] = (crc >> 24) & 0xFF;
+  chunk[2] = (crc >> 16) & 0xFF;
+  chunk[3] = (crc >> 8) & 0xFF;
+  chunk[4] = crc & 0xFF;
+  
+  gSocket.SendTo( IP_Endpoint(192.168.1.3:40001), chunk, 5 );
 }
 
 on preStop
@@ -575,7 +767,7 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
   
   }
   
-  if(buffer[0] == 0x12){
+  if(buffer[0] == UPDATE_MODE){
     
     //todo 업데이트 모드를 모든 ecu에 뿌려주고 ecu의 pos 또는 neg respond_OTA메시지를 vum에게 다시 전송해주기
     vum_request_adas_msg.sig_sid = 0x12;
@@ -588,80 +780,21 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
     output(vum_request_oc_msg);
     vum_request_p_msg.sig_sid = 0x12;
     output(vum_request_p_msg);
-    
-    update_mode_respond();
   }
-  else if(buffer[0] == 0x13){
-    metadata_receive_respond();
+  else if(buffer[0] == METADATA){
+    // 
+  }
+  else if(buffer[0] == PAYLOAD){
+    // 8byte씩 잘라서 보내주기
+  }
+  else if(buffer[0] == VERIFY){
+    verification_receive_respond(VERIFY + 0x40);
+  }
+  else if(buffer[0] == ROLLBACK){
+    // to-do
   }
 
   // To receive more data, we have to call ReceiveFrom again.
   gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
 }
-
-/*on sysvar sysvar::Sender::cgw_TxButton
-{
-  // send on button down
-  if (@this == 1)
-  {
-    char text[200];
-    
-    // get string from sysvar 
-    sysGetVariableString( sysvar::Sender::cgw_TxText, text, elcount(text) );
-    
-    // send text to IP address/UDP port of the receiver
-    gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), text, strlen(text) );
-  }
-}
-
-on sysvar_update sysvar::Receiver::cgw_Open
-{
-  // on open button down...
-  if (@this == 1)
-  {
-    // Open an UDP socket. As source address 0.0.0.0 is used, this means that
-    // the configure address of the TCP/IP stack is used. See TCP/IP stack
-    // configuration dialog in the simulation setup
-    // On UDP port 40001 we want to receive UDP pacekts.
-    gSocket = UdpSocket::Open( IP_Endpoint(0.0.0.0:40001) );
-    
-    if (IpGetLastError() != 0)
-    {
-      // if UdpSocket::Open fails, we print a message to the write window
-      write( "<%BASE_FILE_NAME%> UdpSocket::Open failed with reauls %d", IpGetLastError() );
-      return;
-    }
-    
-    // To receive data with the created socket, we have to call ReceiveFrom.
-    gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
-    
-    // if ReceiveFrom does not immediatelly copy to to gRxBuffer, it returns 997 to
-    // indicate it will call the callback function OnUdpReceiveFrom later.
-    if ((gSocket.GetLastSocketError() != 0) && (gSocket.GetLastSocketError()  != 997))
-    {
-      char errorString[100];
-      // if ReceiveFrom fails, we print a message to the write window
-      gSocket.GetLastSocketErrorAsString( errorString, elcount(errorString) );
-      write( "<%BASE_FILE_NAME%> ReceiveFrom failed with result %d (%s)", IpGetLastError(), errorString );
-    }
-    
-    // update panel controls state
-    EnableControl( "Sender", "OpenButton", 0 );
-    EnableControl( "Sender", "CloseButton", 1 );
-  }
-}
-
-on sysvar_update sysvar::Receiver::cgw_Close
-{
-  // on open button down...
-  if (@this == 1)
-  {
-    // Close socket
-    gSocket.Close();
-
-    // update panel controls state
-    EnableControl( "Sender", "OpenButton", 1 );
-    EnableControl( "Sender", "CloseButton", 0 );
-  }
-}*/
 
