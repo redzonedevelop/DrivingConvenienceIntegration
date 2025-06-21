@@ -7,12 +7,61 @@ includes
 variables
 {
   message Cluster_Pos_Respond_OTA cluster_pos_msg;
+  message Cluster_Neg_Respond_OTA cluster_neg_msg;
+  
+  int my_ecu_name = 17;
+  int rxbuffer[1500];
+  int rxoffset = 0;
+  int metadata_recved = 0;
+  
 }
 
 on message OCCAN::VUM_Request_ECU
 {
-  cluster_pos_msg.sig_sid = this.sig_sid+0x40;
-  output(cluster_pos_msg);
+  if(this.sig_sid ==0x12)
+  {
+    cluster_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(cluster_pos_msg);
+  }
+  
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset+1 == @sysvar::OTA::occan_file_size)
+      {
+        cluster_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        cluster_neg_msg.sig_neg_respond = 0x7F;
+        cluster_neg_msg.sig_sid = this.sig_sid;
+      }
+    }
+  }
   
   //negative
+}
+
+on message OC_CAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    @sysvar::OTA::occan_file_size = this.sig_file_size;
+    cluster_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(cluster_pos_msg);
+    metadata_recved = 1;
+  }
+  
+}
+
+
+on message OC_CAN::VUM_File_Cluster
+{
+  int count = 0;
+  for(count=0;count<8;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++; 
+  }
 }

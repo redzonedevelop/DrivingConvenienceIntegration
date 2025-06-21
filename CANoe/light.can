@@ -8,16 +8,21 @@ variables
 {
   int steering;
   int threshold = 30;
-  msTimer sendTimer100a;
+  int my_ecu_name = 14;
+  int rxbuffer[1500];
+  int rxoffset = 0;
+  int metadata_recved = 0;
+  msTimer sendTimer100;
   message BODY::Light_Info_Cluster light_info_msg;
   message Light_Pos_Respond_OTA light_pos_msg;
+  message Light_Neg_Respond_OTA light_neg_msg;
 }
 on start
 {
-  setTimerCyclic(sendTimer100a, 100); 
+  setTimerCyclic(sendTimer100, 100); 
 }
 
-on timer sendTimer100a
+on timer sendTimer100
 {
   
   if(@sysvar::Light::light_active ==1)
@@ -75,6 +80,51 @@ on message BODY::Steering_Angle_Info_ECU
 
 on message BODY::VUM_Request_ECU
 {
-  light_pos_msg.sig_sid = this.sig_sid+0x40;
-  output(light_pos_msg);
+  
+  if(this.sig_sid ==0x12)
+  {
+    cancelTimer(sendTimer100);
+    light_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(light_pos_msg);
+  }
+  
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset+1 == @sysvar::OTA::bcan_file_size)
+      {
+        light_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        light_neg_msg.sig_neg_respond = 0x7F;
+        light_neg_msg.sig_sid = this.sig_sid;
+      }
+    }
+  }
+  
+  //negative
+}
+
+on message B_CAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    @sysvar::OTA::bcan_file_size = this.sig_file_size;
+    light_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(light_pos_msg);
+    metadata_recved = 1;
+  }
+  
+}
+
+on message B_CAN::VUM_File_Light
+{
+  int count = 0;
+  for(count=0;count<8;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++; 
+  }
 }

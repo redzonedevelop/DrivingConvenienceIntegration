@@ -8,6 +8,7 @@ variables {
   message ABS_Info_Cluster abs_msg;
   message ABS_Alive abs_alive_msg;
   message CCAN::ABS_Pos_Respond_OTA abs_pos_msg;
+  message CCAN::ABS_Neg_Respond_OTA abs_neg_msg;
   //timer
   msTimer t_abs;
 
@@ -24,6 +25,11 @@ variables {
   float v2;
   float tmp1;
   float tmp2;
+  
+  int my_ecu_name = 5;
+  int rxbuffer[1500];
+  int rxoffset = 0;
+  int metadata_recved = 0;
 
 }
 
@@ -74,7 +80,49 @@ on timer t_abs {
 
 on message CCAN::VUM_Request_ECU
 {
-  abs_pos_msg.sig_sid = this.sig_sid+0x40;
-  output(abs_pos_msg);
+  if(this.sig_sid ==0x12)
+  {
+    cancelTimer(t_abs);
+    abs_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(abs_pos_msg);
+  }
   
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset+1 == @sysvar::OTA::ccan_file_size)
+      {
+        abs_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        abs_neg_msg.sig_neg_respond = 0x7F;
+        abs_neg_msg.sig_sid = this.sig_sid;
+      }
+    }
+  }
+  
+}
+
+on message CCAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    @sysvar::OTA::ccan_file_size = this.sig_file_size;
+    abs_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(abs_pos_msg);
+    metadata_recved = 1;
+  }
+  
+}
+
+on message C_CAN::VUM_File_ABS
+{
+  int count = 0;
+  for(count=0;count<8;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++; 
+  }
 }

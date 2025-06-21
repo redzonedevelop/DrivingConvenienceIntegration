@@ -9,11 +9,15 @@ variables
   //send message
   message Battery_Info_Cluster battery_info_msg;
   message BMS_Pos_Respond_OTA bms_pos_msg;
+  message BMS_Neg_Respond_OTA bms_neg_msg;
   //timer
   msTimer t_bms;
   
   //var
-  
+  int my_ecu_name = 2;
+  int rxbuffer[1500];
+  int rxoffset = 0;
+  int metadata_recved = 0;
 }
 
 on start
@@ -31,7 +35,50 @@ on timer t_bms
 
 on message PCAN::VUM_Request_ECU
 {
-  bms_pos_msg.sig_sid = this.sig_sid+0x40;
-  output(bms_pos_msg);
+  if(this.sig_sid ==0x12)
+  {
+    cancelTimer(t_bms);
+    bms_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(bms_pos_msg);
+  }
+  
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset+1 == @sysvar::OTA::pcan_file_size)
+      {
+        bms_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        bms_neg_msg.sig_neg_respond = 0x7F;
+        bms_neg_msg.sig_sid = this.sig_sid;
+      }
+    }
+  }
+  
   //negative
+}
+
+on message PCAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    @sysvar::OTA::pcan_file_size = this.sig_file_size;
+    bms_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(bms_pos_msg);
+    metadata_recved = 1;
+  }
+  
+}
+
+on message P_CAN::VUM_File_BMS
+{
+  int count = 0;
+  for(count=0;count<8;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++; 
+  }
 }

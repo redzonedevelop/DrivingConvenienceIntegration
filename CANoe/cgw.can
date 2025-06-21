@@ -479,14 +479,14 @@ on message ADASCAN::ADAS_Control_Brake
 
 on message ADASCAN::ADAS_Control_Motor
 {
-  //motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//±×³É longitudinal speed¸¦ Áà¹ö¸±±î
+  //motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//ï¿½×³ï¿½ longitudinal speedï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
   motor_control_p_msg.sig_control_speed = @sysvar::Motor::longitudinal_speed;
   output(motor_control_p_msg);
 }
 
 on message ADASCAN::ADAS_Control_Steering
 {
-  steering_control_c_msg.sig_control_steering = this.sig_control_steering; // todo½ºÆ¼¾î¸µ¿¡¼­ °è»êÇØ¼­ÀúÀåÇØµÖ¾ßÇÔ.
+  steering_control_c_msg.sig_control_steering = this.sig_control_steering; // todoï¿½ï¿½Æ¼ï¿½î¸µï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ØµÖ¾ï¿½ï¿½ï¿½.
   output(steering_control_c_msg);
 }
 
@@ -769,7 +769,7 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
   
   if(buffer[0] == UPDATE_MODE){
     
-    //todo ¾÷µ¥ÀÌÆ® ¸ðµå¸¦ ¸ðµç ecu¿¡ »Ñ·ÁÁÖ°í ecuÀÇ pos ¶Ç´Â neg respond_OTA¸Þ½ÃÁö¸¦ vum¿¡°Ô ´Ù½Ã Àü¼ÛÇØÁÖ±â
+    //todo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½å¸¦ ï¿½ï¿½ï¿½ ecuï¿½ï¿½ ï¿½Ñ·ï¿½ï¿½Ö°ï¿½ ecuï¿½ï¿½ pos ï¿½Ç´ï¿½ neg respond_OTAï¿½Þ½ï¿½ï¿½ï¿½ï¿½ï¿½ vumï¿½ï¿½ï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
     vum_request_adas_msg.sig_sid = 0x12;
     output(vum_request_adas_msg);
     vum_request_b_msg.sig_sid = 0x12;
@@ -785,13 +785,17 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
     // 
   }
   else if(buffer[0] == PAYLOAD){
-    // 8byte¾¿ Àß¶ó¼­ º¸³»ÁÖ±â
+    // 8byteï¿½ï¿½ ï¿½ß¶ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
   }
   else if(buffer[0] == VERIFY){
     verification_receive_respond(VERIFY + 0x40);
   }
   else if(buffer[0] == ROLLBACK){
     // to-do
+  else if(buffer[0] == 0x13){
+    //todo ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ ecuï¿½ï¿½ ï¿½Ñ·ï¿½ï¿½Ö°ï¿½ ecuï¿½ï¿½ pos ï¿½Ç´ï¿½ neg respond_OTAï¿½Þ½ï¿½ï¿½ï¿½ï¿½ï¿½ vumï¿½ï¿½ï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
+    
+    metadata_receive_respond();
   }
 
   // To receive more data, we have to call ReceiveFrom again.
