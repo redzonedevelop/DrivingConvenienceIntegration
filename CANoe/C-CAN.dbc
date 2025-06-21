@@ -110,8 +110,8 @@ BO_ 1160 Brake_Pos_Respond_OTA: 8 Brake
 BO_ 133 Brake_Request_OBD: 1 Brake
  SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
 
-BO_ 1219 Steering_Angle_Info_ECU: 1 Steering
- SG_ sig_steering_angle : 0|8@1+ (1,0) [0|255] ""  Master
+BO_ 1219 Steering_Angle_Info_ECU: 2 Steering
+ SG_ sig_steering_angle : 0|10@1- (1,0) [-180|180] ""  Master
 
 BO_ 130 AEB_Info_ECU: 1 Brake
  SG_ sig_aeb_active : 0|1@1+ (1,0) [0|1] "flag"  Master
