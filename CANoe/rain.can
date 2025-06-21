@@ -1,0 +1,18 @@
+/*@!Encoding:949*/
+includes
+{
+  
+}
+
+variables
+{
+  message Rain_Pos_Respond_OTA rain_pos_msg;
+}
+
+on message BODY::VUM_Request_ECU
+{
+  rain_pos_msg.sig_sid = this.sig_sid+0x40;
+  output(rain_pos_msg);
+  
+  //negative
+}

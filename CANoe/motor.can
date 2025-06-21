@@ -8,7 +8,7 @@ variables
 {
   //send message
   message Motor_Info_ECU motor_info_oc_msg;
-
+  message Motor_Pos_Respond_OTA motor_pos_msg;
   //timer
   msTimer t_motor;
 
@@ -19,6 +19,8 @@ variables
 on start
 {
   setTimerCyclic(t_motor, 5);
+  //cancelTimer(t_motor);
+  //setTimerCyclic(t_motor, 5);
 }
 
 //ADAS
@@ -63,4 +65,11 @@ on message Brake_Control_Motor
    {
      brake_pressed = 0;
    }
+}
+
+on message PCAN::VUM_Request_ECU
+{
+  motor_pos_msg.sig_sid = this.sig_sid+0x40;
+  output(motor_pos_msg);
+  //negative 
 }

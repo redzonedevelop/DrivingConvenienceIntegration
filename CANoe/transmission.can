@@ -8,7 +8,7 @@ variables
 {
   //send message
   message PCAN::Transmission_Info_ECU transmission_info_msg;
-  
+  message Transmission_Pos_Respond_OTA transmission_pos_msg;
   //timer
   msTimer sendTimer100;
   
@@ -25,4 +25,12 @@ on timer sendTimer100
 
   output(transmission_info_msg); 
 
+}
+
+on message PCAN::VUM_Request_ECU
+{
+  transmission_pos_msg.sig_sid = this.sig_sid+0x40;
+  output(transmission_pos_msg);
+  
+  //negative
 }

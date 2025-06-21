@@ -7,6 +7,7 @@ variables
 {
   //send message
   message C_CAN::Steering_Angle_Info_ECU steering_info_msg;
+  message Steering_Pos_Respond_OTA steering_pos_msg;
   
   //timer
   msTimer t_steering;
@@ -40,4 +41,11 @@ on message C_CAN::ADAS_Control_Steering
    steering_info_msg.sig_steering_angle = @sysvar::Steering::control_steering;
   
   output(steering_info_msg);
+}
+
+on message CCAN::VUM_Request_ECU
+{
+  steering_pos_msg.sig_sid = this.sig_sid+0x40;
+  output(steering_pos_msg);
+  
 }

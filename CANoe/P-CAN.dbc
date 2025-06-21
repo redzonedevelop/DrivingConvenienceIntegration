@@ -101,7 +101,7 @@ BO_ 3 Motor_Request_OBD: 1 Motor
 BO_ 1090 Battery_Info_Cluster: 2 BMS
  SG_ sig_regen_brake_active : 9|1@1+ (1,0) [0|1] "flag"  Master
  SG_ sig_charging_state : 8|1@1+ (1,0) [0|1] "flag"  Master
- SG_ sig_battery_level : 0|8@1+ (1,0) [0|255] "%"  Master
+ SG_ sig_battery_level : 0|2@1+ (1,0) [0|3] "%"  Master
 
 BO_ 1057 Transmission_Info_ECU: 1 Transmission
  SG_ sig_gear_mode : 0|2@1+ (1,0) [0|3] "stage"  Master
