@@ -15,10 +15,14 @@ variables
 
   //var
   int cur_steering_angle = 0;
+
   int my_ecu_name = 6;
   int rxbuffer[1500];
   int rxoffset = 0;
   int metadata_recved = 0;
+  int input = 0;
+  float scaled = 0.0;
+
 }
 
 on start
@@ -29,7 +33,12 @@ on start
 on timer t_steering
 {
   steering_info_msg.sig_steering_angle = @sysvar::Steering::control_steering;
+  
+  input = @sysvar::Steering::control_steering;
+  scaled = (input + 180.0) * (18.0 / 360.0);
+  @sysvar::Steering::steering_switch_value = (int)(scaled + 0.5);  // �ݿø�
 
+  
   output(steering_info_msg);
 }
 

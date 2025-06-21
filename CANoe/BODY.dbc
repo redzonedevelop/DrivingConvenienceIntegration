@@ -58,8 +58,8 @@ BO_ 493 Seat_Request_OBD: 1 Vector__XXX
 BO_ 1676 VUM_File_Light: 8 CGW
  SG_ sig_payload : 0|64@1- (1,0) [0|0] ""  Light
 
-BO_ 1219 Steering_Angle_Info_ECU: 1 CGW
- SG_ sig_steering_angle : 0|8@1- (1,0) [0|0] ""  CGW,Seat,Light
+BO_ 1219 Steering_Angle_Info_ECU: 2 CGW
+ SG_ sig_steering_angle : 0|10@1- (1,0) [-512|511] ""  Seat,Light
 
 BO_ 1024 Motor_Info_ECU: 5 CGW
  SG_ sig_wheel_speed_RR : 32|8@1- (1,0) [0|0] ""  Seat,Light
