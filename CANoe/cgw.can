@@ -49,6 +49,16 @@ variables
   message OCCAN::Steering_Angle_Info_ECU steering_angle_oc_msg;
   message OCCAN::Transmission_Info_ECU transmission_info_oc_msg;
   message OCCAN::VUM_Request_ECU vum_request_oc_msg;
+  
+  // request & respond
+  const int DTC = 0x10;
+  const int RXSWIN = 0x11;
+  const int UPDATE_MODE = 0x12;
+  const int METADATA = 0x13;
+  const int PAYLOAD = 0x14;
+  const int VERIFY = 0x15;
+  const int ROLLBACK = 0x16;
+  const int OTA_ERROR = 0x7F;
 }
 
 on start
@@ -439,28 +449,6 @@ dword calcCRC32(byte data[], int len)
     i = i + 1;
   }
   return ~crc;
-}
-
-on sysvar_update sysvar::cgw::payload{
-  
-  int metadata_len = 0;
-  int payload_len = 0; 
-  
-  offset = 0;
-  
-  sysGetVariableString( sysvar::cgw::metadata, gGetSysBuffer, elcount(gGetSysBuffer) );
-  metadata_len = strlen(gGetSysBuffer);
-  
-  memcpy_off(gTxBuffer, 0, gGetSysBuffer, 0, metadata_len);
-  
-  sysGetVariableString( sysvar::cgw::payload, gGetSysBuffer, elcount(gGetSysBuffer) );
-  payload_len = strlen(gGetSysBuffer);
-  
-  memcpy_off(gTxBuffer, metadata_len, gGetSysBuffer, 0, payload_len);
-  
-  fullLength = metadata_len + payload_len;
-  
-  setTimer(send_loop, 100);
 }
 
 on timer send_loop
