@@ -9,18 +9,21 @@ variables
   //send message
   message Motor_Info_ECU motor_info_oc_msg;
   message Motor_Pos_Respond_OTA motor_pos_msg;
+  message Motor_Neg_Respond_OTA motor_neg_msg;
   //timer
   msTimer t_motor;
 
   //var
   int brake_pressed = 0;  
+  int my_ecu_name = 0;
+  int rxbuffer[1500];
+  int rxoffset = 0;
+  int metadata_recved = 0;
 }
 
 on start
 {
   setTimerCyclic(t_motor, 5);
-  //cancelTimer(t_motor);
-  //setTimerCyclic(t_motor, 5);
 }
 
 //ADAS
@@ -69,7 +72,51 @@ on message Brake_Control_Motor
 
 on message PCAN::VUM_Request_ECU
 {
-  motor_pos_msg.sig_sid = this.sig_sid+0x40;
-  output(motor_pos_msg);
+  
+  if(this.sig_sid ==0x12)
+  {
+    cancelTimer(t_motor);
+    motor_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(motor_pos_msg);
+  }
+  
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset+1 == @sysvar::OTA::pcan_file_size)
+      {
+        motor_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        motor_neg_msg.sig_neg_respond = 0x7F;
+        motor_neg_msg.sig_sid = this.sig_sid;
+      }
+    }
+  }
+  
   //negative 
+}
+
+on message PCAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    @sysvar::OTA::pcan_file_size = this.sig_file_size;
+    motor_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(motor_pos_msg);
+    metadata_recved = 1;
+  }
+  
+}
+
+on message P_CAN::VUM_File_Motor
+{
+  int count = 0;
+  for(count=0;count<8;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++; 
+  }
 }

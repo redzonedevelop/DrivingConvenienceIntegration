@@ -9,11 +9,16 @@ variables
   //send message
   message Brake_Control_ECU Brake_Control_ECU;
   message Brake_Pos_Respond_OTA brake_pos_msg;
+  message Brake_Neg_Respond_OTA brake_neg_msg;
   //timer
   msTimer t_brake;
   
   //var
   int brake_level=0;
+  int my_ecu_name = 4;
+  int rxbuffer[1500];
+  int rxoffset = 0;
+  int metadata_recved = 0;
 }
 
 on start
@@ -43,9 +48,49 @@ on timer t_brake
 
 on message CCAN::VUM_Request_ECU
 {
-  brake_pos_msg.sig_sid = this.sig_sid+0x40;
-  output(brake_pos_msg);
+  if(this.sig_sid ==0x12)
+  {
+    cancelTimer(t_brake);
+    brake_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(brake_pos_msg);
+  }
   
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset+1 == @sysvar::OTA::ccan_file_size)
+      {
+        brake_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        brake_neg_msg.sig_neg_respond = 0x7F;
+        brake_neg_msg.sig_sid = this.sig_sid;
+      }
+    }
+  }
   //negative
 }
 
+on message CCAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    @sysvar::OTA::ccan_file_size = this.sig_file_size;
+    brake_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(brake_pos_msg);
+    metadata_recved = 1;
+  }
+  
+}
+
+on message C_CAN::VUM_File_Brake
+{
+  int count = 0;
+  for(count=0;count<8;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++; 
+  }
+}

@@ -13,6 +13,12 @@ variables
   message ADASCAN::ADAS_Control_Motor motor_msg;
   message ADASCAN::ADAS_Info_Cluster adas_info_msg;
   message ADAS_Pos_Respond_OTA adas_pos_msg;
+  message ADAS_Neg_Respond_OTA adas_neg_msg;
+  
+  int my_ecu_name = 8;
+  int rxbuffer[1500];
+  int rxoffset = 0;
+  int metadata_recved = 0;
 }
 
 on start
@@ -57,8 +63,54 @@ on timer sendTimer100
 
 on message ADASCAN::VUM_Request_ECU
 {
-  adas_pos_msg.sig_sid = this.sig_sid+0x40;
-  output(adas_pos_msg);
+  
+  if(this.sig_sid ==0x12)
+  {
+    cancelTimer(sendTimer10);
+    cancelTimer(sendTimer100);
+    adas_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(adas_pos_msg);
+  }
+  
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset+1 == @sysvar::OTA::adascan_file_size)
+      {
+        adas_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        adas_neg_msg.sig_neg_respond = 0x7F;
+        adas_neg_msg.sig_sid = this.sig_sid;
+      }
+    }
+    
+  }
+  
   
   //negative
+}
+
+on message ADAS_CAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    @sysvar::OTA::adascan_file_size = this.sig_file_size;
+    adas_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(adas_pos_msg);
+    metadata_recved = 1;
+  }
+  
+}
+
+on message ADAS_CAN::VUM_File_ADAS
+{
+  int count = 0;
+  for(count=0;count<8;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++; 
+  }
 }

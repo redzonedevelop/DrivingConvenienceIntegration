@@ -588,8 +588,6 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
   }
   
   if(buffer[0] == 0x12){
-    
-    //todo 업데이트 모드를 모든 ecu에 뿌려주고 ecu의 pos 또는 neg respond_OTA메시지를 vum에게 다시 전송해주기
     vum_request_adas_msg.sig_sid = 0x12;
     output(vum_request_adas_msg);
     vum_request_b_msg.sig_sid = 0x12;
@@ -604,6 +602,8 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
     update_mode_respond();
   }
   else if(buffer[0] == 0x13){
+    //todo 메타데이터를 모든 ecu에 뿌려주고 ecu의 pos 또는 neg respond_OTA메시지를 vum에게 다시 전송해주기
+    
     metadata_receive_respond();
   }
 
