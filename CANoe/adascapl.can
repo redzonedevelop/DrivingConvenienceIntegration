@@ -19,7 +19,7 @@ on start
   setTimerCyclic(sendTimer10,10);
   setTimerCyclic(sendTimer100,100);
 }
-
+/*
 on timer sendTimer10
 {
   if(@sysvar::Steering::adas_control_steering !=0)
@@ -53,3 +53,4 @@ on timer sendTimer100
   
   output(adas_info_msg);
 }
+*/
