@@ -49,7 +49,7 @@ on timer sendTimer100a
   }
   
   
-  write("light_active = %d fog_active = %d high = %d low = %d",@sysvar::Light::light_active,light_info_msg.sig_fog_light,light_info_msg.sig_high_beam,light_info_msg.sig_low_beam);
+  //write("light_active = %d fog_active = %d high = %d low = %d",@sysvar::Light::light_active,light_info_msg.sig_fog_light,light_info_msg.sig_high_beam,light_info_msg.sig_low_beam);
   
 }
 

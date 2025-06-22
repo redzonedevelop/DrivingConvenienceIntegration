@@ -104,7 +104,7 @@ BO_ 1090 Battery_Info_Cluster: 2 BMS
  SG_ sig_battery_level : 0|2@1+ (1,0) [0|3] "%"  Master
 
 BO_ 1057 Transmission_Info_ECU: 1 Transmission
- SG_ sig_gear_mode : 0|2@1+ (1,0) [0|3] "stage"  Master
+ SG_ sig_gear_mode : 0|2@1+ (1,0) [0|3] "stage"  Motor,Master
 
 BO_ 1024 Motor_Info_ECU: 5 Motor
  SG_ sig_wheel_speed_RR : 32|8@1+ (1,0) [0|255] "km/h"  Master

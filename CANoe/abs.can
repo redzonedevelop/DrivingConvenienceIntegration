@@ -1,80 +1,71 @@
 /*@!Encoding:949*/
 includes {
-  
 }
 
 variables {
-  //send message
+  // 메시지
   message ABS_Info_Cluster abs_msg;
   message ABS_Alive abs_alive_msg;
   message CCAN::ABS_Pos_Respond_OTA abs_pos_msg;
-  //timer
-  msTimer t_abs;
 
-  //var
+  // 타이머
+  msTimer t_200ms;
+  msTimer t_5ms;
+
+  // 상태 변수
   int brake_pressed = 0;
   int cur_speed = 0;
   int prev_speed = 0;
 
-  float decel = 0.0;
+  float decel = 0.0; // 감속도 (km/h/s)
   int abs_active = 0;
-  int abs_prev = 0;
-  
-  float v1;
-  float v2;
-  float tmp1;
-  float tmp2;
-
-}
+  }
 
 on start {
-  //setTimerCyclic(t_abs, 5); // 5ms 주기 ABS 판단 시작
+  setTimerCyclic(t_200ms, 200); // 200ms 주기
+  setTimerCyclic(t_5ms, 5);
 }
 
-// 속도 수신 (km/h)
+// 차량 속도 수신 (km/h)
 on message Motor_Info_ECU {
   cur_speed = this.sig_car_speed;
 }
 
-// 브레이크 입력 수신 (flag: 0 or 1)
+// 브레이크 입력 수신 (0 or 1)
 on message Brake_Control_ECU {
   brake_pressed = this.sig_brake_pressed;
 }
 
-// ABS 판단 로직 (5ms 주기)
-on timer t_abs {
-  tmp1 = prev_speed;
-  tmp2 = cur_speed;
+on timer t_5ms
+{
+  //write("abs_error: %d\n",@sysvar::`ABS::abs_error);
+  if(@sysvar::`ABS::abs_error==0)
+    output(abs_alive_msg);
+}
 
-  v1 = tmp1 / 3.6;
-  v2 = tmp2 / 3.6;
-  decel = (v1 - v2) / 0.005;            // m/s²
+// ABS 판단 및 메시지 전송
+on timer t_200ms {
+  // 감속도 계산 (단위: km/h/s)
+  decel = ((float)(prev_speed - cur_speed)) / 0.2;
 
-  // ABS ON 조건 
-  if (brake_pressed && decel > 20.0 && cur_speed > 10) {
+  // ABS 작동 조건: 브레이크 + 급감속(25km/h/s 이상)
+  if (brake_pressed && decel > 25.0) {
     abs_active = 1;
-  }
-  // OFF 조건
-  else if (abs_active && (decel < 10.0 || !brake_pressed || cur_speed < 5)) {
+  } else {
     abs_active = 0;
   }
 
-  // 상태 변화 시 메시지 전송
-  if (abs_active != abs_prev) {
-    abs_msg.sig_abs_active = abs_active;  // 0 or 1
+  // ABS 상태 메시지 전송
+  abs_msg.sig_abs_active = abs_active;
+  if(@sysvar::`ABS::abs_error==0)
     output(abs_msg);
-    abs_prev = abs_active;
-  }
 
-  // 다음 주기 준비
+  // 다음 주기를 위한 속도 갱신
   prev_speed = cur_speed;
-  
-  output(abs_alive_msg);
 }
 
-on message CCAN::VUM_Request_ECU
-{
-  abs_pos_msg.sig_sid = this.sig_sid+0x40;
+// OTA 요청 응답 처리
+on message CCAN::VUM_Request_ECU {
+  abs_pos_msg.sig_sid = this.sig_sid + 0x40; // SID 응답값
   output(abs_pos_msg);
-  
 }

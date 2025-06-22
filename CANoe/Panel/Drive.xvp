@@ -1,6 +1,20 @@
 <?xml version="1.0"?>
 <Panel Type="Vector.CANalyzer.Panels.PanelSerializer, Vector.CANalyzer.Panels.Serializer, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null">
   <Object Type="Vector.CANalyzer.Panels.Runtime.Panel, Vector.CANalyzer.Panels.Common, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="Panel" Children="Controls" ControlName="Drive">
+    <Object Type="Vector.CANalyzer.Panels.Design.SwitchControl, Vector.CANalyzer.Panels.CommonControls, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="SwitchControl7" ControlName="Switch/Indicator 7">
+      <Property Name="Name">SwitchControl7</Property>
+      <Property Name="Size">81, 136</Property>
+      <Property Name="Location">62, 36</Property>
+      <Property Name="StateCnt">2</Property>
+      <Property Name="SwitchValues">1;2;0;1</Property>
+      <Property Name="SwitchValuesRx">1;2;0;1</Property>
+      <Property Name="SwitchValuesVT">1;2;0/Lower/0;1/Lower/1</Property>
+      <Property Name="SwitchValuesVTXml">&lt;Version&gt;2&lt;/Version&gt;&lt;Count&gt;2&lt;/Count&gt;&lt;RxValue&gt;0&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;0&lt;/TxValue&gt;&lt;RxValue&gt;1&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;1&lt;/TxValue&gt;</Property>
+      <Property Name="IsButton">True</Property>
+      <Property Name="ImageFile">..\..\..\3차프젝\Bitmaps\악셀.png</Property>
+      <Property Name="SymbolConfiguration">8;16;Motor;;;accel_pressed;1;;;-1;;;;;;0</Property>
+      <Property Name="TabIndex">20</Property>
+    </Object>
     <Object Type="Vector.CANalyzer.Panels.Design.SwitchControl, Vector.CANalyzer.Panels.CommonControls, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="SwitchControl2" ControlName="Switch/Indicator 2">
       <Property Name="Name">SwitchControl2</Property>
       <Property Name="Size">152, 211</Property>
@@ -112,16 +126,6 @@
       <Property Name="ImageFile">..\..\..\3차프젝\Bitmaps\ControlBreak.bmp</Property>
       <Property Name="SymbolConfiguration">8;16;Brake;;;brake_pressed;1;;;-1;;;;;;0</Property>
       <Property Name="TabIndex">2</Property>
-    </Object>
-    <Object Type="Vector.CANalyzer.Panels.Design.TrackBarControl, Vector.CANalyzer.Panels.CommonControls, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="TrackBarControl1" Children="Controls" ControlName="Accel">
-      <Property Name="Name">TrackBarControl1</Property>
-      <Property Name="Size">134, 47</Property>
-      <Property Name="Location">21, 50</Property>
-      <Property Name="MaximumSize">100000, 47</Property>
-      <Property Name="Maximum">120</Property>
-      <Property Name="MaximumDouble">120</Property>
-      <Property Name="SymbolConfiguration">8;16;Motor;;;longitudinal_speed;1;;;-1;;;;;;0</Property>
-      <Property Name="TabIndex">0</Property>
     </Object>
     <Property Name="Name">Panel</Property>
     <Property Name="Size">617, 311</Property>

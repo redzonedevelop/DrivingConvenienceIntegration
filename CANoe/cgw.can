@@ -22,7 +22,7 @@ variables
   
   
   //var
-  int abs_error = 0;
+  
   //P-CAN
   message PCAN::Brake_Control_Motor brake_control_p_msg;
   message PCAN::ADAS_Control_Motor motor_control_p_msg;
@@ -204,7 +204,7 @@ on message CCAN::ABS_Request_OBD
 
 on message CCAN::ABS_Slave_Active
 {
-
+ 
 }
 
 on message CCAN::AEB_Info_ECU
