@@ -11,7 +11,7 @@
       <Property Name="SwitchValuesVT">1;2;0/Lower/0;1/Lower/1</Property>
       <Property Name="SwitchValuesVTXml">&lt;Version&gt;2&lt;/Version&gt;&lt;Count&gt;2&lt;/Count&gt;&lt;RxValue&gt;0&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;0&lt;/TxValue&gt;&lt;RxValue&gt;1&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;1&lt;/TxValue&gt;</Property>
       <Property Name="IsButton">True</Property>
-      <Property Name="ImageFile">..\..\..\3차프젝\Bitmaps\악셀.png</Property>
+      <Property Name="ImageFile">Bitmaps\악셀.png</Property>
       <Property Name="SymbolConfiguration">8;16;Motor;;;accel_pressed;1;;;-1;;;;;;0</Property>
       <Property Name="TabIndex">20</Property>
     </Object>
@@ -24,7 +24,7 @@
       <Property Name="SwitchValuesRx">1;19;0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18</Property>
       <Property Name="SwitchValuesVT">1;19;0/Lower/0;1/Lower/1;2/Lower/2;3/Lower/3;4/Lower/4;5/Lower/5;6/Lower/6;7/Lower/7;8/Lower/8;9/Lower/9;10/Lower/10;11/Lower/11;12/Lower/12;13/Lower/13;14/Lower/14;15/Lower/15;16/Lower/16;17/Lower/17;18/Lower/18</Property>
       <Property Name="SwitchValuesVTXml">&lt;Version&gt;2&lt;/Version&gt;&lt;Count&gt;19&lt;/Count&gt;&lt;RxValue&gt;0&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;0&lt;/TxValue&gt;&lt;RxValue&gt;1&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;1&lt;/TxValue&gt;&lt;RxValue&gt;2&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;2&lt;/TxValue&gt;&lt;RxValue&gt;3&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;3&lt;/TxValue&gt;&lt;RxValue&gt;4&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;4&lt;/TxValue&gt;&lt;RxValue&gt;5&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;5&lt;/TxValue&gt;&lt;RxValue&gt;6&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;6&lt;/TxValue&gt;&lt;RxValue&gt;7&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;7&lt;/TxValue&gt;&lt;RxValue&gt;8&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;8&lt;/TxValue&gt;&lt;RxValue&gt;9&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;9&lt;/TxValue&gt;&lt;RxValue&gt;10&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;10&lt;/TxValue&gt;&lt;RxValue&gt;11&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;11&lt;/TxValue&gt;&lt;RxValue&gt;12&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;12&lt;/TxValue&gt;&lt;RxValue&gt;13&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;13&lt;/TxValue&gt;&lt;RxValue&gt;14&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;14&lt;/TxValue&gt;&lt;RxValue&gt;15&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;15&lt;/TxValue&gt;&lt;RxValue&gt;16&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;16&lt;/TxValue&gt;&lt;RxValue&gt;17&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;17&lt;/TxValue&gt;&lt;RxValue&gt;18&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;18&lt;/TxValue&gt;</Property>
-      <Property Name="ImageFile">..\..\..\3차프젝\Bitmaps\steering.png</Property>
+      <Property Name="ImageFile">Bitmaps\steering.png</Property>
       <Property Name="SymbolConfiguration">8;16;Steering;;;steering_switch_value;1;;;-1;;;;;;0</Property>
       <Property Name="TabIndex">19</Property>
     </Object>
@@ -38,7 +38,7 @@
       <Property Name="SwitchValuesRx">1;2;0;3</Property>
       <Property Name="SwitchValuesVT">1;2;0/Lower/0;3/Lower/3</Property>
       <Property Name="SwitchValuesVTXml">&lt;Version&gt;2&lt;/Version&gt;&lt;Count&gt;2&lt;/Count&gt;&lt;RxValue&gt;0&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;0&lt;/TxValue&gt;&lt;RxValue&gt;3&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;3&lt;/TxValue&gt;</Property>
-      <Property Name="ImageFile">..\..\..\3차프젝\Bitmaps\D버튼.png</Property>
+      <Property Name="ImageFile">Bitmaps\D버튼.png</Property>
       <Property Name="SymbolConfiguration">8;16;Transmission;;;gear;1;;;-1;;;;;;0</Property>
       <Property Name="TabIndex">18</Property>
     </Object>
@@ -52,7 +52,7 @@
       <Property Name="SwitchValuesRx">1;2;0;2</Property>
       <Property Name="SwitchValuesVT">1;2;0/Lower/0;2/Lower/2</Property>
       <Property Name="SwitchValuesVTXml">&lt;Version&gt;2&lt;/Version&gt;&lt;Count&gt;2&lt;/Count&gt;&lt;RxValue&gt;0&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;0&lt;/TxValue&gt;&lt;RxValue&gt;2&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;2&lt;/TxValue&gt;</Property>
-      <Property Name="ImageFile">..\..\..\3차프젝\Bitmaps\N버튼.png</Property>
+      <Property Name="ImageFile">Bitmaps\N버튼.png</Property>
       <Property Name="SymbolConfiguration">8;16;Transmission;;;gear;1;;;-1;;;;;;0</Property>
       <Property Name="TabIndex">17</Property>
     </Object>
@@ -66,7 +66,7 @@
       <Property Name="SwitchValuesRx">1;2;0;1</Property>
       <Property Name="SwitchValuesVT">1;2;0/Lower/0;1/Lower/1</Property>
       <Property Name="SwitchValuesVTXml">&lt;Version&gt;2&lt;/Version&gt;&lt;Count&gt;2&lt;/Count&gt;&lt;RxValue&gt;0&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;0&lt;/TxValue&gt;&lt;RxValue&gt;1&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;1&lt;/TxValue&gt;</Property>
-      <Property Name="ImageFile">..\..\..\3차프젝\Bitmaps\R버튼.png</Property>
+      <Property Name="ImageFile">Bitmaps\R버튼.png</Property>
       <Property Name="SymbolConfiguration">8;16;Transmission;;;gear;1;;;-1;;;;;;0</Property>
       <Property Name="TabIndex">16</Property>
     </Object>
@@ -80,7 +80,7 @@
       <Property Name="SwitchValuesRx">1;2;-1;0</Property>
       <Property Name="SwitchValuesVT">1;2;-1/Lower/-1;0/Lower/0</Property>
       <Property Name="SwitchValuesVTXml">&lt;Version&gt;2&lt;/Version&gt;&lt;Count&gt;2&lt;/Count&gt;&lt;RxValue&gt;-1&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;-1&lt;/TxValue&gt;&lt;RxValue&gt;0&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;0&lt;/TxValue&gt;</Property>
-      <Property Name="ImageFile">..\..\..\3차프젝\Bitmaps\p버튼.png</Property>
+      <Property Name="ImageFile">Bitmaps\p버튼.png</Property>
       <Property Name="SymbolConfiguration">8;16;Transmission;;;gear;1;;;-1;;;;;;0</Property>
       <Property Name="TabIndex">15</Property>
     </Object>
@@ -123,7 +123,7 @@
       <Property Name="SwitchValuesVT">1;2;0/Lower/0;1/Lower/1</Property>
       <Property Name="SwitchValuesVTXml">&lt;Version&gt;2&lt;/Version&gt;&lt;Count&gt;2&lt;/Count&gt;&lt;RxValue&gt;0&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;0&lt;/TxValue&gt;&lt;RxValue&gt;1&lt;/RxValue&gt;&lt;LowerUpper&gt;Lower&lt;/LowerUpper&gt;&lt;TxValue&gt;1&lt;/TxValue&gt;</Property>
       <Property Name="IsButton">True</Property>
-      <Property Name="ImageFile">..\..\..\3차프젝\Bitmaps\ControlBreak.bmp</Property>
+      <Property Name="ImageFile">Bitmaps\ControlBreak.bmp</Property>
       <Property Name="SymbolConfiguration">8;16;Brake;;;brake_pressed;1;;;-1;;;;;;0</Property>
       <Property Name="TabIndex">2</Property>
     </Object>
