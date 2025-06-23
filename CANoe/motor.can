@@ -11,11 +11,17 @@ variables
   message Motor_Pos_Respond_OTA motor_pos_msg;
   message Motor_Neg_Respond_OTA motor_neg_msg;
   //timer
-  msTimer t_motor;
-
+  msTimer t_5ms;
+  msTimer t_100ms;
   //var
   int brake_pressed = 0;  
   int rxbuffer[20000];
+
+  int trans_state = 0;
+  int threshold = 0;
+  int my_ecu_name = 0;
+
+
   int rxoffset = 0;
   int my_ecu_name = 0;
   int metadata_recved = 0;
@@ -29,36 +35,57 @@ variables
 
 on start
 {
-  setTimerCyclic(t_motor, 5);
+  setTimerCyclic(t_5ms, 5);
+  setTimerCyclic(t_100ms, 100);
+  //cancelTimer(t_motor);
+  //setTimerCyclic(t_motor, 5);
 }
 
 //ADAS
 on message PCAN::ADAS_Control_Motor
 {
   motor_info_oc_msg.sig_car_speed = this.sig_control_speed;
-
   if(@sysvar::Transmission::gear<3&&this.sig_control_speed>0)
-
   {
     @sysvar::Transmission::gear = 3;
   }
+  write("adas speed: %d\n",this.sig_control_speed);
+  write("adas transmisson %d\n",@sysvar::Transmission::gear);
   output(motor_info_oc_msg);
 }
 
-on timer t_motor
-{     
-  if(brake_pressed==0)
+on message P_CAN::Transmission_Info_ECU
+{
+  trans_state = this.sig_gear_mode;
+}
+
+on timer t_100ms
+{
+  if(@sysvar::Motor::accel_pressed&&trans_state>0)
   {
-     motor_info_oc_msg.sig_car_speed = @Motor::longitudinal_speed;
+    @Motor::longitudinal_speed++;
   }
-  else
-  {
-    if(@Motor::longitudinal_speed>0)
-    {
-      @Motor::longitudinal_speed--;
-      motor_info_oc_msg.sig_car_speed = @Motor::longitudinal_speed;
-    }  
+  
+  if (brake_pressed && @Motor::longitudinal_speed > 0) {
+    threshold++; 
+
+    if (threshold < 10) 
+      @Motor::longitudinal_speed -= 1;
+    else 
+      @Motor::longitudinal_speed -= 5;
+
+    if (@Motor::longitudinal_speed < 0) {
+      @Motor::longitudinal_speed = 0;
+    }
+
+  } else {
+    threshold = 0; 
   }
+}
+
+on timer t_5ms
+{      
+  motor_info_oc_msg.sig_car_speed = @Motor::longitudinal_speed;
   output(motor_info_oc_msg);
 }
 
@@ -80,7 +107,8 @@ on message PCAN::VUM_Request_ECU
 {
   if(this.sig_sid ==0x12)
   {
-    cancelTimer(t_motor);
+    cancelTimer(t_5ms);
+    cancelTimer(t_100ms);
     motor_pos_msg.sig_sid = this.sig_sid+0x40;
     output(motor_pos_msg);
   }

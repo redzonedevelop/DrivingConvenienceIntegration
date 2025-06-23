@@ -16,6 +16,7 @@ variables
   msTimer send_payload;
   
   //var
+
   int abs_error = 0;
   
   // metadata
@@ -26,6 +27,7 @@ variables
   int payload_receive_offset = 0;
   int payload_send_offset = 0;
   int metadata_received_flag = 0;
+
   
   
   //P-CAN
@@ -41,11 +43,15 @@ variables
   message CCAN::Motor_Info_ECU motor_info_c_msg;
   message CCAN::ADAS_Control_Steering steering_control_c_msg;
   message CCAN::VUM_Request_ECU vum_request_c_msg;
+
   message CCAN::VUM_Metadata_ECU vum_metadata_c_msg;
   message CCAN::VUM_File_ABS vum_payload_abs_msg;
   message CCAN::VUM_File_Brake vum_payload_brake_msg;
   message CCAN::VUM_File_Steering vum_payload_steering_msg;
   
+
+  message CCAN::ABS_Request_OBD abs_obd_msg;
+
   //B-CAN
   message BODY::Steering_Angle_Info_ECU steering_info_b_msg;
   message BODY::VUM_Request_ECU vum_request_b_msg;
@@ -71,9 +77,13 @@ variables
   message OCCAN::Steering_Angle_Info_ECU steering_angle_oc_msg;
   message OCCAN::Transmission_Info_ECU transmission_info_oc_msg;
   message OCCAN::VUM_Request_ECU vum_request_oc_msg;
+
   message OCCAN::VUM_Metadata_ECU vum_metadata_oc_msg;
   message OCCAN::VUM_File_Cluster vum_payload_cluster_msg;
   message OCCAN::VUM_File_OBD vum_payload_obd_msg;
+
+  message OCCAN::ECU_Request_OBD ecu_obd_msg;
+
   
   // request & respond
   const int DTC = 0x10;
@@ -316,12 +326,13 @@ on message CCAN::ABS_Pos_Respond_OTA
 
 on message CCAN::ABS_Request_OBD
 {
-
+  ecu_obd_msg.sig_sid = this.sig_sid;
+  output(ecu_obd_msg);
 }
 
 on message CCAN::ABS_Slave_Active
 {
-
+ 
 }
 
 on message CCAN::AEB_Info_ECU
@@ -584,14 +595,16 @@ on message ADASCAN::ADAS_Control_Brake
 
 on message ADASCAN::ADAS_Control_Motor
 {
-  //motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//�׳� longitudinal speed�� �������?
-  motor_control_p_msg.sig_control_speed = @sysvar::Motor::longitudinal_speed;
+
+  motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//�׳� longitudinal speed�� �������?
+  //motor_control_p_msg.sig_control_speed = @sysvar::Motor::longitudinal_speed;
+  write("cgw speed %d\n",this.sig_control_accerleration);
   output(motor_control_p_msg);
 }
 
 on message ADASCAN::ADAS_Control_Steering
 {
-  steering_control_c_msg.sig_control_steering = this.sig_control_steering; // todo��Ƽ����� ����ؼ������ص־���?
+  steering_control_c_msg.sig_control_steering = this.sig_control_steering; // todo��Ƽ����� ����ؼ������ص־���?
   output(steering_control_c_msg);
 }
 
@@ -968,7 +981,13 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
     } 
   }
   else if(buffer[0] == ROLLBACK){
-    // to-do   
+
+    // to-do
+  }
+  else if(buffer[0] == 0x13){
+    
+    //metadata_receive_respond();
+
   }
 
   // To receive more data, we have to call ReceiveFrom again.

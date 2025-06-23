@@ -8,6 +8,7 @@ variables
 {
   message OBD_Pos_Respond_OTA obd_pos_msg;
   message OBD_Neg_Respond_OTA obd_neg_msg;
+  message OBD_MIL_Cluster obd_mil_msg;
   
   int my_ecu_name = 16;
   int rxbuffer[20000];
@@ -17,6 +18,15 @@ variables
   // metadata
   int version = 0;
   int file_size = 0;
+}
+
+on message ECU_Request_OBD
+{
+  if(this.sig_sid == 0x10)
+  {
+    obd_mil_msg.sig_mil=1;
+    output(obd_mil_msg);
+  }
 }
 
 on message OCCAN::VUM_Request_ECU

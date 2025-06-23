@@ -109,10 +109,10 @@ BO_ 1664 VUM_Request_ECU: 1 Master
  SG_ sig_sid : 0|8@1- (1,0) [0|0] "" Vector__XXX
 
 BO_ 260 ECU_Request_OBD: 1 Master
- SG_ sig_sid : 0|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  OBD
 
-BO_ 0 OBD_MIL_Cluster: 1 OBD
- SG_ sig_mil : 0|1@1- (1,0) [0|0] ""  Cluster
+BO_ 1540 OBD_MIL_Cluster: 1 OBD
+ SG_ sig_mil : 0|1@1+ (1,0) [0|1] ""  Cluster
 
 BO_ 515 OBD_Neg_Respond_OBD: 2 OBD
  SG_ sig_sid : 8|8@1- (1,0) [0|0] "" Vector__XXX
@@ -187,7 +187,7 @@ BA_ "GenMsgCycleTime" BO_ 1678 0;
 BA_ "GenMsgCycleTime" BO_ 1665 0;
 BA_ "GenMsgCycleTime" BO_ 1664 0;
 BA_ "GenMsgCycleTime" BO_ 260 0;
-BA_ "GenMsgCycleTime" BO_ 0 0;
+BA_ "GenMsgCycleTime" BO_ 1540 0;
 BA_ "GenMsgCycleTime" BO_ 515 0;
 BA_ "GenMsgCycleTime" BO_ 514 0;
 BA_ "GenMsgCycleTime" BO_ 1537 0;
@@ -198,5 +198,5 @@ VAL_ 1481 sig_fog_light 1 "ON" 0 "OFF" ;
 VAL_ 1481 sig_low_beam 1 "ON" 0 "OFF" ;
 VAL_ 1481 sig_high_beam 1 "ON" 0 "OFF" ;
 VAL_ 1057 sig_gear_mode 3 "D" 2 "N" 1 "R" 0 "P" ;
-VAL_ 0 sig_mil 1 "ON" 0 "OFF" ;
+VAL_ 1540 sig_mil 1 "ON" 0 "OFF" ;
 

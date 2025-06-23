@@ -54,6 +54,7 @@ on timer sendTimer100
   {
     light_info_msg.sig_low_beam = 0;
     light_info_msg.sig_high_beam = 0;
+    light_info_msg.sig_fog_light = 0;
     output(light_info_msg);
   }
   
@@ -64,21 +65,25 @@ on timer sendTimer100
 
 on message BODY::Steering_Angle_Info_ECU
 {
-  if(this.sig_steering_angle>threshold)
+  if(@sysvar::Light::light_active ==1)
   {
-    @sysvar::Light::corner_light_left = 1;
-    @sysvar::Light::corner_light_right = 0;
+    if(this.sig_steering_angle>threshold)
+    {
+      @sysvar::Light::corner_light_left = 1;
+      @sysvar::Light::corner_light_right = 0;
+    }
+    else if(this.sig_steering_angle<(-1*threshold))
+    {
+      @sysvar::Light::corner_light_right = 1;
+      @sysvar::Light::corner_light_left = 0;
+    }
+    else
+    {
+      @sysvar::Light::corner_light_left = 0;
+      @sysvar::Light::corner_light_right = 0;
+    }
   }
-  else if(this.sig_steering_angle<(-1*threshold))
-  {
-    @sysvar::Light::corner_light_right = 1;
-    @sysvar::Light::corner_light_left = 0;
-  }
-  else
-  {
-    @sysvar::Light::corner_light_left = 0;
-    @sysvar::Light::corner_light_right = 0;
-  }
+  
   
 }
 
