@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <Panel Type="Vector.CANalyzer.Panels.PanelSerializer, Vector.CANalyzer.Panels.Serializer, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null">
   <Object Type="Vector.CANalyzer.Panels.Runtime.Panel, Vector.CANalyzer.Panels.Common, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="Panel" Children="Controls" ControlName="Drive">
+    <Object Type="Vector.CANalyzer.Panels.Design.PictureBoxControl, Vector.CANalyzer.Panels.CommonControls, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="PictureBoxControl2" ControlName="Picture Box 2">
+      <Property Name="Name">PictureBoxControl2</Property>
+      <Property Name="Size">35, 35</Property>
+      <Property Name="Location">282, 125</Property>
+      <Property Name="ImageFile">Bitmaps\DashboardCircleBlack.png</Property>
+    </Object>
     <Object Type="Vector.CANalyzer.Panels.Design.SwitchControl, Vector.CANalyzer.Panels.CommonControls, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="SwitchControl7" ControlName="Switch/Indicator 7">
       <Property Name="Name">SwitchControl7</Property>
       <Property Name="Size">81, 136</Property>
