@@ -88,7 +88,7 @@
       <Property Name="Name">PictureBoxControl1</Property>
       <Property Name="Size">199, 298</Property>
       <Property Name="Location">414, 19</Property>
-      <Property Name="ImageFile">..\..\..\..\Downloads\변속버튼.png</Property>
+      <Property Name="ImageFile">Bitmaps\변속버튼.png</Property>
     </Object>
     <Object Type="Vector.CANalyzer.Panels.Design.TrackBarControl, Vector.CANalyzer.Panels.CommonControls, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="TrackBarControl2" Children="Controls" ControlName="Track Bar 1">
       <Property Name="Name">TrackBarControl2</Property>
