@@ -23,6 +23,7 @@ variables
   
   //var
   
+  
   //P-CAN
   message PCAN::Brake_Control_Motor brake_control_p_msg;
   message PCAN::ADAS_Control_Motor motor_control_p_msg;
@@ -482,8 +483,9 @@ on message ADASCAN::ADAS_Control_Brake
 
 on message ADASCAN::ADAS_Control_Motor
 {
-  //motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//ï¿½×³ï¿½ longitudinal speedï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?
-  motor_control_p_msg.sig_control_speed = @sysvar::Motor::longitudinal_speed;
+  motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//ï¿½×³ï¿½ longitudinal speedï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?
+  //motor_control_p_msg.sig_control_speed = @sysvar::Motor::longitudinal_speed;
+  write("cgw speed %d\n",this.sig_control_accerleration);
   output(motor_control_p_msg);
 }
 

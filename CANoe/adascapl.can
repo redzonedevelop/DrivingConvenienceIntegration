@@ -26,7 +26,6 @@ on start
   setTimerCyclic(sendTimer10,10);
   setTimerCyclic(sendTimer100,100);
 }
-/*
 on timer sendTimer10
 {
   if(@sysvar::Steering::adas_control_steering !=0)
@@ -39,6 +38,7 @@ on timer sendTimer10
   {
     motor_msg.sig_control_accerleration = @sysvar::Motor::adas_control_speed;
     @sysvar::Motor::longitudinal_speed = @sysvar::Motor::adas_control_speed;
+    
     output(motor_msg);
   }
   
@@ -49,7 +49,7 @@ on timer sendTimer100
   if(@sysvar::Motor::adas_control_speed>0)
   {
     adas_info_msg.sig_ACC = 1;
-    adas_info_msg.sig_LKA = 1;//adas �� �������������� �ӵ��� �����ϸ� acc�� ������ ���� 
+    adas_info_msg.sig_LKA = 1;
   }
   else
   {
@@ -61,7 +61,7 @@ on timer sendTimer100
   output(adas_info_msg);
 }
 
-*/
+
 
 
 on message ADASCAN::VUM_Request_ECU
@@ -105,8 +105,7 @@ on message ADAS_CAN::VUM_Metadata_ECU
     adas_pos_msg.sig_sid = this.sig_sid+0x40;
     output(adas_pos_msg);
     metadata_recved = 1;
-  }
-  
+  }  
 }
 
 on message ADAS_CAN::VUM_File_ADAS

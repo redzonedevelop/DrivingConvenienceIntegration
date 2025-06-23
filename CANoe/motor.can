@@ -35,12 +35,12 @@ on start
 on message PCAN::ADAS_Control_Motor
 {
   motor_info_oc_msg.sig_car_speed = this.sig_control_speed;
-
   if(@sysvar::Transmission::gear<3&&this.sig_control_speed>0)
-
   {
     @sysvar::Transmission::gear = 3;
   }
+  write("adas speed: %d\n",this.sig_control_speed);
+  write("adas transmisson %d\n",@sysvar::Transmission::gear);
   output(motor_info_oc_msg);
 }
 
