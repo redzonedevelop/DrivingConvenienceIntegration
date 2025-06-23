@@ -10,10 +10,13 @@ variables
   message Cluster_Neg_Respond_OTA cluster_neg_msg;
   
   int my_ecu_name = 17;
-  int rxbuffer[1500];
+  int rxbuffer[20000];
   int rxoffset = 0;
   int metadata_recved = 0;
   
+  // metadata
+  int version = 0;
+  int file_size = 0;
 }
 
 on message OCCAN::VUM_Request_ECU
@@ -28,7 +31,7 @@ on message OCCAN::VUM_Request_ECU
   {
     if(metadata_recved ==1)
     {
-      if (rxoffset+1 == @sysvar::OTA::occan_file_size)
+      if (rxoffset == file_size)
       {
         cluster_pos_msg.sig_sid = this.sig_sid+0x40;
       }
@@ -37,6 +40,7 @@ on message OCCAN::VUM_Request_ECU
         cluster_neg_msg.sig_neg_respond = 0x7F;
         cluster_neg_msg.sig_sid = this.sig_sid;
       }
+      output(cluster_pos_msg);
     }
   }
   
@@ -47,21 +51,39 @@ on message OC_CAN::VUM_Metadata_ECU
 {
   if(this.sig_ecu_name == my_ecu_name)
   {
-    @sysvar::OTA::occan_file_size = this.sig_file_size;
-    cluster_pos_msg.sig_sid = this.sig_sid+0x40;
+    file_size = this.sig_file_size;
+    version = this.sig_version;
+    cluster_pos_msg.sig_sid = this.sig_sid + 0x40;
     output(cluster_pos_msg);
     metadata_recved = 1;
   }
-  
+  write("metadata comes in!");
 }
 
 
 on message OC_CAN::VUM_File_Cluster
 {
   int count = 0;
-  for(count=0;count<8;count++)
+  int len = 0;
+
+  if (file_size - rxoffset >= 8) {
+    len = 8;
+  }
+  else {
+    len = file_size - rxoffset;
+  }
+  for (count = 0;count < len;count++)
   {
     rxbuffer[rxoffset] = this.byte(count);
-    rxoffset++; 
+    rxoffset++;
   }
+
+  if ((rxoffset % 4000 == 0) || rxoffset == file_size) {
+    cluster_pos_msg.sig_sid = 0x14 + 0x40;
+    output(cluster_pos_msg);
+  }
+  
+  @sysvar::VUM::update_progress = (int)(((double)rxoffset / (double)file_size) * 100);
+
+  write("payload comes in!, %d", rxoffset);
 }

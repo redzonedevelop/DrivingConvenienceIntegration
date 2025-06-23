@@ -55,9 +55,9 @@ BO_ 514 OBD_Pos_Respond_OBD: 1 Master
 BO_ 1672 VUM_File_ADAS: 8 Master
  SG_ sig_payload : 0|64@1- (1,0) [0|0] ""  ADAS
 
-BO_ 1665 VUM_Metadata_ECU: 4 Master
+BO_ 1665 VUM_Metadata_ECU: 5 Master
  SG_ sig_version : 16|8@1+ (1,0) [0|255] ""  ADAS
- SG_ sig_file_size : 24|8@1+ (1,0) [0|255] ""  ADAS
+ SG_ sig_file_size : 24|16@1+ (1,0) [0|65535] ""  ADAS
  SG_ sig_ecu_name : 8|8@1+ (1,0) [0|255] ""  ADAS
  SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ADAS
 
@@ -141,8 +141,8 @@ BA_DEF_DEF_  "GenMsgCycleTimeFast" 20;
 BA_DEF_DEF_  "GenMsgILSupport" "Yes";
 BA_DEF_DEF_  "GenMsgFastOnStart" 0;
 BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
-BA_ "BusType" "CAN";
 BA_ "DatabaseVersion" "1.1";
+BA_ "BusType" "CAN";
 BA_ "DiagResponse" BO_ 515 1;
 BA_ "DiagResponse" BO_ 514 1;
 BA_ "DiagRequest" BO_ 1664 1;

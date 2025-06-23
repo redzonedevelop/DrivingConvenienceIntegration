@@ -1,6 +1,33 @@
 <?xml version="1.0"?>
 <Panel Type="Vector.CANalyzer.Panels.PanelSerializer, Vector.CANalyzer.Panels.Serializer, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null">
   <Object Type="Vector.CANalyzer.Panels.Runtime.Panel, Vector.CANalyzer.Panels.Common, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="Panel" Children="Controls" ControlName="User">
+    <Object Type="Vector.CANalyzer.Panels.Design.TextBoxControl, Vector.CANalyzer.Panels.CommonControls, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="TextBoxControl1" Children="Controls" ControlName="Input/Output Box 1">
+      <Property Name="Name">TextBoxControl1</Property>
+      <Property Name="Size">114, 20</Property>
+      <Property Name="Location">185, 228</Property>
+      <Property Name="AlarmUpperTextColor">WindowText</Property>
+      <Property Name="ValueDecimalPlaces">0</Property>
+      <Property Name="AlarmLowerBkgColor">Salmon</Property>
+      <Property Name="ValueDisplay">Decimal</Property>
+      <Property Name="AlarmUpperBkgColor">IndianRed</Property>
+      <Property Name="AlarmLowerTextColor">WindowText</Property>
+      <Property Name="AlarmGeneralSettings">1;2;0;100</Property>
+      <Property Name="DisplayLabel">Right</Property>
+      <Property Name="DescriptionText">%</Property>
+      <Property Name="DescriptionSize">15, 20</Property>
+      <Property Name="UsedValueTable">PhysicalValue</Property>
+      <Property Name="SymbolConfiguration">8;16;VUM;;;update_progress;1;;;-1;;;;;;0</Property>
+      <Property Name="TabIndex">14</Property>
+    </Object>
+    <Object Type="Vector.CANalyzer.Panels.Design.ProgressBarControl, Vector.CANalyzer.Panels.CommonControls, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="ProgressBarControl1" Children="Controls" ControlName="Progress Bar 1">
+      <Property Name="Name">ProgressBarControl1</Property>
+      <Property Name="Size">414, 28</Property>
+      <Property Name="Location">32, 195</Property>
+      <Property Name="OriginValue">0</Property>
+      <Property Name="DecimalPlaces">0</Property>
+      <Property Name="ValueSize">25, 28</Property>
+      <Property Name="SymbolConfiguration">8;16;VUM;;;update_progress;1;;;-1;;;;;;0</Property>
+    </Object>
     <Object Type="Vector.CANalyzer.Panels.Design.ButtonControl, Vector.CANalyzer.Panels.CommonControls, Version=16.7.5.0, Culture=neutral, PublicKeyToken=null" Name="ButtonControl4" Children="Controls" ControlName="Button 2">
       <Property Name="Name">ButtonControl4</Property>
       <Property Name="Size">77, 22</Property>

@@ -16,9 +16,13 @@ variables
   message ADAS_Neg_Respond_OTA adas_neg_msg;
   
   int my_ecu_name = 8;
-  int rxbuffer[1500];
+  int rxbuffer[20000];
   int rxoffset = 0;
   int metadata_recved = 0;
+  
+  // metadata
+  int version = 0;
+  int file_size = 0;
 }
 
 on start
@@ -66,11 +70,8 @@ on timer sendTimer100
 
 on message ADASCAN::VUM_Request_ECU
 {
-  
   if(this.sig_sid ==0x12)
   {
-    cancelTimer(sendTimer10);
-    cancelTimer(sendTimer100);
     adas_pos_msg.sig_sid = this.sig_sid+0x40;
     output(adas_pos_msg);
   }
@@ -79,7 +80,7 @@ on message ADASCAN::VUM_Request_ECU
   {
     if(metadata_recved ==1)
     {
-      if (rxoffset+1 == @sysvar::OTA::adascan_file_size)
+      if (rxoffset == file_size)
       {
         adas_pos_msg.sig_sid = this.sig_sid+0x40;
       }
@@ -88,10 +89,9 @@ on message ADASCAN::VUM_Request_ECU
         adas_neg_msg.sig_neg_respond = 0x7F;
         adas_neg_msg.sig_sid = this.sig_sid;
       }
+      output(adas_pos_msg);
     }
-    
   }
-  
   
   //negative
 }
@@ -101,21 +101,39 @@ on message ADAS_CAN::VUM_Metadata_ECU
 {
   if(this.sig_ecu_name == my_ecu_name)
   {
-    @sysvar::OTA::adascan_file_size = this.sig_file_size;
-    adas_pos_msg.sig_sid = this.sig_sid+0x40;
+    file_size = this.sig_file_size;
+    version = this.sig_version;
+    adas_pos_msg.sig_sid = this.sig_sid + 0x40;
     output(adas_pos_msg);
     metadata_recved = 1;
   }
-  
+  write("metadata comes in!");
 }
 
 on message ADAS_CAN::VUM_File_ADAS
 {
   int count = 0;
-  for(count=0;count<8;count++)
+  int len = 0;
+
+  if (file_size - rxoffset >= 8) {
+    len = 8;
+  }
+  else {
+    len = file_size - rxoffset;
+  }
+  for (count = 0;count < len;count++)
   {
     rxbuffer[rxoffset] = this.byte(count);
-    rxoffset++; 
+    rxoffset++;
   }
+
+  if ((rxoffset % 4000 == 0) || rxoffset == file_size) {
+    adas_pos_msg.sig_sid = 0x14 + 0x40;
+    output(adas_pos_msg);
+  }
+  
+  @sysvar::VUM::update_progress = (int)(((double)rxoffset / (double)file_size) * 100);
+
+  write("payload comes in!, %d", rxoffset);
 }
 

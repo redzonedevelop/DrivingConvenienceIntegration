@@ -58,10 +58,10 @@ BO_ 1670 VUM_File_Brake: 1 Master
 BO_ 1669 VUM_File_ABS: 1 Master
  SG_ sig_payload : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,ABS
 
-BO_ 1665 VUM_Metadata_ECU: 4 Master
+BO_ 1665 VUM_Metadata_ECU: 5 Master
  SG_ sig_version : 16|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS_Slave,ABS
  SG_ sig_ecu_name : 8|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS_Slave,ABS
- SG_ sig_file_size : 24|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS_Slave,ABS
+ SG_ sig_file_size : 24|16@1+ (1,0) [0|65535] ""  Steering,Brake,ABS_Slave,ABS
  SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
 
 BO_ 1664 VUM_Request_ECU: 1 Master

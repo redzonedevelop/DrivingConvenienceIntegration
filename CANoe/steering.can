@@ -17,12 +17,15 @@ variables
   int cur_steering_angle = 0;
 
   int my_ecu_name = 6;
-  int rxbuffer[1500];
+  int rxbuffer[20000];
   int rxoffset = 0;
   int metadata_recved = 0;
   int input = 0;
   float scaled = 0.0;
 
+  // metadata
+  int version = 0;
+  int file_size = 0;
 }
 
 on start
@@ -54,7 +57,6 @@ on message CCAN::VUM_Request_ECU
 {
   if(this.sig_sid ==0x12)
   {
-    cancelTimer(t_steering);
     steering_pos_msg.sig_sid = this.sig_sid+0x40;
     output(steering_pos_msg);
   }
@@ -63,7 +65,7 @@ on message CCAN::VUM_Request_ECU
   {
     if(metadata_recved ==1)
     {
-      if (rxoffset+1 == @sysvar::OTA::ccan_file_size)
+      if (rxoffset == file_size)
       {
         steering_pos_msg.sig_sid = this.sig_sid+0x40;
       }
@@ -72,28 +74,49 @@ on message CCAN::VUM_Request_ECU
         steering_neg_msg.sig_neg_respond = 0x7F;
         steering_neg_msg.sig_sid = this.sig_sid;
       }
+      output(steering_pos_msg);
     }
   }
+  
+  //negative
 }
 
 on message CCAN::VUM_Metadata_ECU
 {
   if(this.sig_ecu_name == my_ecu_name)
   {
-    @sysvar::OTA::ccan_file_size = this.sig_file_size;
-    steering_pos_msg.sig_sid = this.sig_sid+0x40;
+    file_size = this.sig_file_size;
+    version = this.sig_version;
+    steering_pos_msg.sig_sid = this.sig_sid + 0x40;
     output(steering_pos_msg);
     metadata_recved = 1;
   }
-  
+  write("metadata comes in!");
 }
 
 on message C_CAN::VUM_File_Steering
 {
   int count = 0;
-  for(count=0;count<8;count++)
+  int len = 0;
+
+  if (file_size - rxoffset >= 8) {
+    len = 8;
+  }
+  else {
+    len = file_size - rxoffset;
+  }
+  for (count = 0;count < len;count++)
   {
     rxbuffer[rxoffset] = this.byte(count);
-    rxoffset++; 
+    rxoffset++;
   }
+
+  if ((rxoffset % 4000 == 0) || rxoffset == file_size) {
+    steering_pos_msg.sig_sid = 0x14 + 0x40;
+    output(steering_pos_msg);
+  }
+  
+  @sysvar::VUM::update_progress = (int)(((double)rxoffset / (double)file_size) * 100);
+
+  write("payload comes in!, %d", rxoffset);
 }

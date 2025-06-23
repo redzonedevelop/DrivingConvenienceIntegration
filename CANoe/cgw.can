@@ -10,33 +10,55 @@ includes
 variables
 {
   UdpSocket gSocket;
-  char      gRxBuffer[1500];
-  char      gTxBuffer[1500];
-  char      gGetSysBuffer[1500];
-  msTimer send_loop;
-  
-  int fullLength = 0;
-  int chunkSize = 252;
-  int offset = 0;
-
-  
+  byte      gRxBuffer[20000];
+  byte      gTxBuffer[20000];
+  byte      payload_buffer[20000];
+  msTimer send_payload;
   
   //var
   int abs_error = 0;
+  
+  // metadata
+  byte ecu_name = 0;
+  byte version = 0;
+  int file_size = 0;
+  
+  int payload_receive_offset = 0;
+  int payload_send_offset = 0;
+  int metadata_received_flag = 0;
+  
+  
   //P-CAN
   message PCAN::Brake_Control_Motor brake_control_p_msg;
   message PCAN::ADAS_Control_Motor motor_control_p_msg;
   message PCAN::VUM_Request_ECU vum_request_p_msg;
+  message PCAN::VUM_Metadata_ECU vum_metadata_p_msg;
+  message PCAN::VUM_File_BMS vum_payload_bms_msg;
+  message PCAN::VUM_File_Motor vum_payload_motor_msg;
+  message PCAN::VUM_File_Transmission vum_payload_transmission_msg;
   
   //C-CAN
   message CCAN::Motor_Info_ECU motor_info_c_msg;
   message CCAN::ADAS_Control_Steering steering_control_c_msg;
   message CCAN::VUM_Request_ECU vum_request_c_msg;
+  message CCAN::VUM_Metadata_ECU vum_metadata_c_msg;
+  message CCAN::VUM_File_ABS vum_payload_abs_msg;
+  message CCAN::VUM_File_Brake vum_payload_brake_msg;
+  message CCAN::VUM_File_Steering vum_payload_steering_msg;
+  
   //B-CAN
   message BODY::Steering_Angle_Info_ECU steering_info_b_msg;
   message BODY::VUM_Request_ECU vum_request_b_msg;
+  message BODY::VUM_Metadata_ECU vum_metadata_b_msg;
+  message BODY::VUM_File_Illuminate vum_payload_illuminate_msg;
+  message BODY::VUM_File_Light vum_payload_light_msg;
+  message BODY::VUM_File_Rain vum_payload_rain_msg;
+  message BODY::VUM_File_Seat vum_payload_seat_msg;
+  
   //ADAS-CAN
   message ADASCAN::VUM_Request_ECU vum_request_adas_msg;
+  message ADASCAN::VUM_Metadata_ECU vum_metadata_adas_msg;
+  message ADASCAN::VUM_File_ADAS vum_payload_adas_msg;
   //OTA-CAN not exist sorry
   
   //OC-CAN
@@ -49,6 +71,9 @@ variables
   message OCCAN::Steering_Angle_Info_ECU steering_angle_oc_msg;
   message OCCAN::Transmission_Info_ECU transmission_info_oc_msg;
   message OCCAN::VUM_Request_ECU vum_request_oc_msg;
+  message OCCAN::VUM_Metadata_ECU vum_metadata_oc_msg;
+  message OCCAN::VUM_File_Cluster vum_payload_cluster_msg;
+  message OCCAN::VUM_File_OBD vum_payload_obd_msg;
   
   // request & respond
   const int DTC = 0x10;
@@ -133,6 +158,14 @@ on message PCAN::BMS_Pos_Respond_OTA
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
   }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
+  }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
   }
@@ -177,6 +210,14 @@ on message PCAN::Motor_Pos_Respond_OTA
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
   }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
+  }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
   }
@@ -209,6 +250,14 @@ on message Transmission_Pos_Respond_OTA
   }
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
   }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
@@ -244,10 +293,18 @@ on message CCAN::ABS_Neg_Respond_OTA
 on message CCAN::ABS_Pos_Respond_OTA
 {
   if(this.sig_sid == (UPDATE_MODE + 0x40)){ 
-    update_mode_respond(this.sig_sid ,ECU_ABS);
+    update_mode_respond(this.sig_sid, ECU_ABS);
   }
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
   }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
@@ -293,6 +350,14 @@ on message CCAN::Brake_Pos_Respond_OTA
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
   }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
+  }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
   }
@@ -324,6 +389,14 @@ on message CCAN::Steering_Pos_Respond_OTA
   }
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
   }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
@@ -358,6 +431,14 @@ on message BODY::Illuminate_Pos_Respond_OTA
   }
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
   }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
@@ -396,6 +477,14 @@ on message BODY::Light_Pos_Respond_OTA
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
   }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
+  }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
   }
@@ -422,6 +511,14 @@ on message BODY::Rain_Pos_Respond_OTA
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
   }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
+  }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
   }
@@ -447,6 +544,14 @@ on message BODY::Seat_Pos_Respond_OTA
   }
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
   }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
@@ -479,14 +584,14 @@ on message ADASCAN::ADAS_Control_Brake
 
 on message ADASCAN::ADAS_Control_Motor
 {
-  //motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//�׳� longitudinal speed�� �������
+  //motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//�׳� longitudinal speed�� �������?
   motor_control_p_msg.sig_control_speed = @sysvar::Motor::longitudinal_speed;
   output(motor_control_p_msg);
 }
 
 on message ADASCAN::ADAS_Control_Steering
 {
-  steering_control_c_msg.sig_control_steering = this.sig_control_steering; // todo��Ƽ����� ����ؼ������ص־���.
+  steering_control_c_msg.sig_control_steering = this.sig_control_steering; // todo��Ƽ����� ����ؼ������ص־���?
   output(steering_control_c_msg);
 }
 
@@ -510,6 +615,14 @@ on message ADASCAN::ADAS_Pos_Respond_OTA
   }
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
   }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
@@ -538,6 +651,14 @@ on message OCCAN::Cluster_Pos_Respond_OTA
   }
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
+  }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
   }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
@@ -581,6 +702,14 @@ on message OCCAN::OBD_Pos_Respond_OTA
   else if(this.sig_sid == (METADATA + 0x40)){
     metadata_receive_respond(this.sig_sid);
   }
+  else if(this.sig_sid == (PAYLOAD + 0x40)){
+    if(payload_send_offset < file_size){
+      setTimer(send_payload, 10);
+    }
+    else if(payload_send_offset == file_size){
+      payload_receive_respond(this.sig_sid);
+    }
+  }
   else if(this.sig_sid == (VERIFY + 0x40)){
     verification_receive_respond(this.sig_sid);
   }
@@ -610,47 +739,7 @@ dword calcCRC32(byte data[], int len)
   return ~crc;
 }
 
-on timer send_loop
-{
-  byte chunk[256];
-  int len;
-  int i;
-  dword crc;
-  
-  if (fullLength - offset >= chunkSize){
-    len = chunkSize;
-  }
-  else{
-    len = fullLength - offset;
-  }
-  
-  if (offset >= fullLength){
-    for (i = 0; i < elcount(gTxBuffer); i++) {
-      gTxBuffer[i] = 0;
-    } 
-    return;  
-  }
-    
-  for(i = 0; i < len; i++){
-    chunk[i] = gTxBuffer[offset + i];
-  }
-  
-  crc = calcCRC32(chunk, len);
-  
-  chunk[len]     = (crc >> 24) & 0xFF;
-  chunk[len + 1] = (crc >> 16) & 0xFF;
-  chunk[len + 2] = (crc >> 8) & 0xFF;
-  chunk[len + 3] = crc & 0xFF;
 
-    
-    // send text to IP address/UDP port of the receiver
-  gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), chunk, len + 4 );
-  
-  write("CRC32 calculated: 0x%08X", crc);
-  
-  offset += len;
-  setTimer(send_loop, 100);
-}
 
 void update_mode_respond(byte sid, int ECU_NUM){
   byte buf[10];
@@ -749,7 +838,7 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
                     ((dword)(buffer[dataLen + 3])& 0XFF);
       calculatedCRC = calcCRC32(buffer, dataLen);
 
-      write("Recived CRC32 = 0x%08X, Calculated CRC32 = 0x%08X", receivedCRC, calculatedCRC);
+      write("CGW Received CRC32 = 0x%08X, CGW Calculated CRC32 = 0x%08X", receivedCRC, calculatedCRC);
 
       if (receivedCRC == calculatedCRC) {
         write("CRC correct");
@@ -767,38 +856,235 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
   
   }
   
-  if(buffer[0] == UPDATE_MODE){
+  if(metadata_received_flag){
+    // payload
+    int i;
+    for(i = 0; i < dataLen; i++){
+      payload_buffer[payload_receive_offset + i] = buffer[i];
+    }
+    payload_receive_offset = payload_receive_offset + dataLen;
+    write("%d", payload_receive_offset);
+    write("%d", file_size);
     
-    //todo ������Ʈ ��带 ��� ecu�� �ѷ��ְ� ecu�� pos �Ǵ� neg respond_OTA�޽����� vum���� �ٽ� �������ֱ�
-    vum_request_adas_msg.sig_sid = 0x12;
-    output(vum_request_adas_msg);
-    vum_request_b_msg.sig_sid = 0x12;
-    output(vum_request_b_msg);
-    vum_request_c_msg.sig_sid = 0x12;
-    output(vum_request_c_msg);
-    vum_request_oc_msg.sig_sid = 0x12;
-    output(vum_request_oc_msg);
-    vum_request_p_msg.sig_sid = 0x12;
-    output(vum_request_p_msg);
+    if(payload_receive_offset == file_size){
+      metadata_received_flag = 0;
+      setTimer(send_payload, 10);
+    }
+  }
+  else if(buffer[0] == UPDATE_MODE){  
+    switch(buffer[1] >> 2)
+    {
+      case 0:
+        vum_request_p_msg.sig_sid = UPDATE_MODE;
+        output(vum_request_p_msg);
+        break;
+      case 1:
+        vum_request_c_msg.sig_sid = UPDATE_MODE;
+        output(vum_request_c_msg);
+        break;
+      case 2:
+        vum_request_adas_msg.sig_sid = UPDATE_MODE;
+        output(vum_request_adas_msg);
+        break;
+      case 3:
+        vum_request_b_msg.sig_sid = UPDATE_MODE;
+        output(vum_request_b_msg);
+        break;
+      case 4:
+        vum_request_oc_msg.sig_sid = UPDATE_MODE;
+        output(vum_request_oc_msg);
+        break;
+    }
   }
   else if(buffer[0] == METADATA){
-    // 
-  }
-  else if(buffer[0] == PAYLOAD){
-    // 8byte�� �߶� �����ֱ�
+    // send message to target domain
+    ecu_name = buffer[1];
+    version = buffer[2];
+    file_size = buffer[3] + (buffer[4] << 8);
+    metadata_received_flag = 1;
+    
+    switch(ecu_name >> 2)
+    {
+      case 0:
+        vum_metadata_p_msg.sig_sid = METADATA;
+        vum_metadata_p_msg.sig_ecu_name = ecu_name;
+        vum_metadata_p_msg.sig_version = version;
+        vum_metadata_p_msg.sig_file_size = file_size;
+        output(vum_metadata_p_msg);
+        break;
+      case 1:
+        vum_metadata_c_msg.sig_sid = METADATA;
+        vum_metadata_c_msg.sig_ecu_name = ecu_name;
+        vum_metadata_c_msg.sig_version = version;
+        vum_metadata_c_msg.sig_file_size = file_size;
+        output(vum_metadata_c_msg);
+        break;
+      case 2:
+        vum_metadata_adas_msg.sig_sid = METADATA;
+        vum_metadata_adas_msg.sig_ecu_name = ecu_name;
+        vum_metadata_adas_msg.sig_version = version;
+        vum_metadata_adas_msg.sig_file_size = file_size;
+        output(vum_metadata_adas_msg);
+        break;
+      case 3:
+        vum_metadata_b_msg.sig_sid = METADATA;
+        vum_metadata_b_msg.sig_ecu_name = ecu_name;
+        vum_metadata_b_msg.sig_version = version;
+        vum_metadata_b_msg.sig_file_size = file_size;
+        output(vum_metadata_b_msg);
+        break;
+      case 4:
+        vum_metadata_oc_msg.sig_sid = METADATA;
+        vum_metadata_oc_msg.sig_ecu_name = ecu_name;
+        vum_metadata_oc_msg.sig_version = version;
+        vum_metadata_oc_msg.sig_file_size = file_size;
+        output(vum_metadata_oc_msg);
+        break;
+    }
   }
   else if(buffer[0] == VERIFY){
-    verification_receive_respond(VERIFY + 0x40);
+    switch(ecu_name >> 2)
+    {
+    case 0:
+      vum_request_p_msg.sig_sid = VERIFY;
+      output(vum_request_p_msg);
+      break;
+    case 1:
+      vum_request_c_msg.sig_sid = VERIFY;
+      output(vum_request_c_msg);
+      break;
+    case 2:
+      vum_request_adas_msg.sig_sid = VERIFY;
+      output(vum_request_adas_msg);
+      break;
+    case 3:
+      vum_request_b_msg.sig_sid = VERIFY;
+      output(vum_request_b_msg);
+      break;
+    case 4:
+      vum_request_oc_msg.sig_sid = VERIFY;
+      output(vum_request_oc_msg);
+      break;
+    } 
   }
   else if(buffer[0] == ROLLBACK){
-    // to-do
-  else if(buffer[0] == 0x13){
-    //todo ��Ÿ�����͸� ��� ecu�� �ѷ��ְ� ecu�� pos �Ǵ� neg respond_OTA�޽����� vum���� �ٽ� �������ֱ�
-    
-    metadata_receive_respond();
+    // to-do   
   }
 
   // To receive more data, we have to call ReceiveFrom again.
   gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
 }
 
+// payload send
+
+on timer send_payload{
+  int len;
+  int i;
+  
+  if (file_size - payload_send_offset >= 8){
+    len = 8;
+  }
+  else{
+    len = file_size - payload_send_offset;
+  }
+  
+  if (payload_send_offset >= file_size){
+    for (i = 0; i < elcount(payload_buffer); i++) {
+      payload_buffer[i] = 0;
+    } 
+    payload_receive_offset = 0;
+    payload_send_offset = 0;
+    return;  
+  }
+  
+  switch(ecu_name)
+  {
+    case Motor:
+      for(i = 0; i < len; i++){
+        vum_payload_motor_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_motor_msg);
+      break;
+    case Transmission:
+      for(i = 0; i < len; i++){
+        vum_payload_transmission_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_transmission_msg);
+      break;
+    case BMS:
+      for(i = 0; i < len; i++){
+        vum_payload_bms_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_bms_msg);
+      break;
+    case ECU_ABS:
+      for(i = 0; i < len; i++){
+        vum_payload_abs_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_abs_msg);
+      break;
+    case Brake:
+      for(i = 0; i < len; i++){
+        vum_payload_brake_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_brake_msg);
+      break;
+    case Steering:
+      for(i = 0; i < len; i++){
+        vum_payload_steering_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_steering_msg);
+      break;
+    case ADAS:
+      for(i = 0; i < len; i++){
+        vum_payload_adas_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_adas_msg);
+      break;
+    case Illuminate:
+      for(i = 0; i < len; i++){
+        vum_payload_illuminate_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_illuminate_msg);
+      break;
+    case Rain:
+      for(i = 0; i < len; i++){
+        vum_payload_rain_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_rain_msg);
+      break;
+    case Light:
+      for(i = 0; i < len; i++){
+        vum_payload_light_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_light_msg);
+      break;
+    case Seat:
+      for(i = 0; i < len; i++){
+        vum_payload_seat_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_seat_msg);
+      break;
+    case OBD:
+      for(i = 0; i < len; i++){
+        vum_payload_obd_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_obd_msg);
+      break;
+    case Cluster:
+      for(i = 0; i < len; i++){
+        vum_payload_cluster_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      output(vum_payload_cluster_msg);
+      break;
+  }
+  
+  payload_send_offset += len;
+  
+  write("payload_send_offset: %d, file_size: %d",payload_send_offset, file_size);
+  
+  if(payload_send_offset % 4096 == 0){
+    return;
+  }
+  setTimer(send_payload, 10);
+}
