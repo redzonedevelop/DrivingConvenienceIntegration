@@ -65,7 +65,7 @@ void send_request(){
   chunk[3] = (crc >> 8) & 0xFF;
   chunk[4] = crc & 0xFF;
   
-  gSocket.SendTo( IP_Endpoint(192.168.1.1:40001), chunk, 5 );
+  gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), chunk, 5 );
 }
 
 // send message with data
@@ -87,37 +87,27 @@ on timer send_data
     for (i = 0; i < elcount(gTxBuffer); i++) {
       gTxBuffer[i] = 0;
     } 
+    if(cur_state == STATE_SEND_PAYLOAD){
+      cur_state = STATE_VERIFICATION;
+      verify();
+    }
     return;  
   }
     
-  switch(cur_state)
-  {
-    case STATE_SEND_METADATA:
-      chunk[0] = METADATA;
-      break;
-    case STATE_SEND_PAYLOAD:
-      chunk[0] = PAYLOAD;
-      break;
-  }
-  
   for(i = 0; i < len; i++){
-    chunk[i + 1] = gTxBuffer[offset + i];
+    chunk[i] = gTxBuffer[offset + i];
   }
   
-  crc = calcCRC32(chunk, len + 1);
+  crc = calcCRC32(chunk, len);
   
-  chunk[len + 1] = (crc >> 24) & 0xFF;
-  chunk[len + 2] = (crc >> 16) & 0xFF;
-  chunk[len + 3] = (crc >> 8) & 0xFF;
-  chunk[len + 4] = crc & 0xFF;
+  chunk[len]     = (crc >> 24) & 0xFF;
+  chunk[len + 1] = (crc >> 16) & 0xFF;
+  chunk[len + 2] = (crc >> 8) & 0xFF;
+  chunk[len + 3] = crc & 0xFF;
 
     
     // send text to IP address/UDP port of the receiver
-  gSocket.SendTo( IP_Endpoint(192.168.1.1:40001), chunk, len + 5 );
-  
-  // when sending payload
-  if(cur_state == STATE_SEND_PAYLOAD)
-    payload_sended++;
+  gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), chunk, len + 4 );
   
   write("CRC32 calculated: 0x%08X", crc);
   
@@ -138,12 +128,13 @@ void send_message(){
       send_request();
       break;
     case STATE_SEND_METADATA:
-      gTxBuffer[0] = (byte)@sysvar::VUM::ecu_number;
-      gTxBuffer[1] = (byte)@sysvar::VUM::version;
-      gTxBuffer[2] = (byte)@sysvar::VUM::file_size;
+      gTxBuffer[0] = METADATA;
+      gTxBuffer[1] = (byte)@sysvar::VUM::ecu_number;
+      gTxBuffer[2] = (byte)@sysvar::VUM::version;
+      gTxBuffer[3] = (byte)@sysvar::VUM::file_size;
       
       offset = 0;
-      fullLength = 3;
+      fullLength = 4;
       
       setTimer(send_data, 100);
       break;
@@ -344,7 +335,7 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
   // update available & ask user install or not
   if(cur_state == STATE_UPDATE_MODE){
     // can update
-    if((buffer[0] - 0x40) == UPDATE_MODE){
+    if((buffer[0] - 0x40) == UPDATE_MODE && buffer[1] == @sysvar::VUM::ecu_number){
       write("update mode ready!");
       cancelTimer(req_update_mode);
       cur_state = STATE_INSTALL_APPROVE;
@@ -368,7 +359,7 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
       //send_metadata(); // send metadata again
     }
   }
-  else if(cur_state == STATE_SEND_PAYLOAD){
+  /*else if(cur_state == STATE_SEND_PAYLOAD){
     // payload received successfully
     if((buffer[0] - 0x40) == PAYLOAD){
       write("payload received successfully");
@@ -388,7 +379,7 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
       payload_received = 0; // re-send preparation
       payload_sended = 0; // re-send preparation
     }
-  }
+  }*/
   else if(cur_state == STATE_VERIFICATION){
     // verification received successfully
     if((buffer[0] - 0x40) == VERIFY){

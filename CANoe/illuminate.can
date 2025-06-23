@@ -7,12 +7,59 @@ includes
 variables
 {
   message Illuminate_Pos_Respond_OTA illuminate_pos_msg;
+  message Illuminate_Neg_Respond_OTA illuminate_neg_msg;
+  
+  int my_ecu_name = 13;
+  int rxbuffer[1500];
+  int rxoffset = 0;
+  int metadata_recved = 0;
 }
 
 on message BODY::VUM_Request_ECU
 {
-  illuminate_pos_msg.sig_sid = this.sig_sid+0x40;
-  output(illuminate_pos_msg);
+  if(this.sig_sid ==0x12)
+  {
+    illuminate_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(illuminate_pos_msg);
+  }
+  
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset+1 == @sysvar::OTA::bcan_file_size)
+      {
+        illuminate_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        illuminate_neg_msg.sig_neg_respond = 0x7F;
+        illuminate_neg_msg.sig_sid = this.sig_sid;
+      }
+    }
+  }
   
   //negative
+}
+
+on message B_CAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    @sysvar::OTA::bcan_file_size = this.sig_file_size;
+    illuminate_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(illuminate_pos_msg);
+    metadata_recved = 1;
+  }
+  
+}
+
+on message B_CAN::VUM_File_Illuminate
+{
+  int count = 0;
+  for(count=0;count<8;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++; 
+  }
 }

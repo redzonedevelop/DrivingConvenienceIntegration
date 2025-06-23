@@ -9,9 +9,13 @@ variables
   //send message
   message PCAN::Transmission_Info_ECU transmission_info_msg;
   message Transmission_Pos_Respond_OTA transmission_pos_msg;
+  message Transmission_Neg_Respond_OTA transmission_neg_msg;
   //timer
   msTimer sendTimer100;
-  
+  int my_ecu_name = 1;
+  int rxbuffer[1500];
+  int rxoffset = 0;
+  int metadata_recved = 0;
 }
 
 on start 
@@ -29,8 +33,50 @@ on timer sendTimer100
 
 on message PCAN::VUM_Request_ECU
 {
-  transmission_pos_msg.sig_sid = this.sig_sid+0x40;
-  output(transmission_pos_msg);
+  if(this.sig_sid ==0x12)
+  {
+    transmission_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(transmission_pos_msg);
+  }
+  
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset+1 == @sysvar::OTA::pcan_file_size)
+      {
+        transmission_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        transmission_neg_msg.sig_neg_respond = 0x7F;
+        transmission_neg_msg.sig_sid = this.sig_sid;
+      }
+    }
+  }
   
   //negative
+}
+
+on message PCAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    @sysvar::OTA::pcan_file_size = this.sig_file_size;
+    transmission_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(transmission_pos_msg);
+    metadata_recved = 1;
+  }
+  
+}
+
+on message P_CAN::VUM_File_Transmission
+{
+  int count;
+  for(count=0;count<8;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++; 
+  }
+  
 }
