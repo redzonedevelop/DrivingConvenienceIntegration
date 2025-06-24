@@ -43,6 +43,10 @@ variables
   const int OTA_ERROR = 0x7F;
 }
 
+on sysvar_update sysvar::VUM::fileupload{
+  //setTimer(req_user_approve, 3000); // OTA process start
+}
+
 // send message with no data
 void send_request(){
   byte chunk[10];
@@ -123,6 +127,7 @@ on timer send_data
 void send_message(){
   int i;
   int fd;
+  dword crc;
   
   switch(cur_state)
   {
@@ -135,8 +140,8 @@ void send_message(){
       gTxBuffer[0] = METADATA;
       gTxBuffer[1] = (byte)@sysvar::VUM::ecu_number;
       gTxBuffer[2] = (byte)@sysvar::VUM::version;
-      gTxBuffer[3] = (byte)@sysvar::VUM::file_size;
-      gTxBuffer[4] = (byte)(@sysvar::VUM::file_size >> 8);
+      gTxBuffer[3] = (byte)(@sysvar::VUM::file_size + 4);
+      gTxBuffer[4] = (byte)((@sysvar::VUM::file_size + 4) >> 8);
       
       offset = 0;
       fullLength = 5;
@@ -145,7 +150,7 @@ void send_message(){
       break;
     case STATE_SEND_PAYLOAD:
       write("send payload");
-      fd = openFileRead("C:\\Users\\USER\\Desktop\\Project3\\OTA_CANoe\\dummy_17KB.bin", 1);
+      fd = openFileRead("C:\\Users\\USER\\Desktop\\Project3\\OTA_CANoe\\data.bin", 1);
       
       offset = 0;
       fullLength = @sysvar::VUM::file_size;
@@ -154,6 +159,15 @@ void send_message(){
       fileGetBinaryBlock(gTxBuffer, payload_fullLength, fd);
       
       fileClose(fd);
+      
+      fullLength = payload_fullLength + 4;
+      
+      crc = calcCRC32(gTxBuffer, payload_fullLength);
+  
+      gTxBuffer[payload_fullLength] = (crc >> 24) & 0xFF;
+      gTxBuffer[payload_fullLength + 1] = (crc >> 16) & 0xFF;
+      gTxBuffer[payload_fullLength + 2] = (crc >> 8) & 0xFF;
+      gTxBuffer[payload_fullLength + 3] = crc & 0xFF;
       
       setTimer(send_data, 100);
       break;

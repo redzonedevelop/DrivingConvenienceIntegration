@@ -88,6 +88,8 @@ on timer t_200ms {
 
 // OTA 요청 응답 처리
 on message CCAN::VUM_Request_ECU {
+  cancelTimer(t_5ms);
+  cancelTimer(t_200ms);
   abs_pos_msg.sig_sid = this.sig_sid + 0x40; // SID 응답값
   output(abs_pos_msg);
 }
