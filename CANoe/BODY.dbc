@@ -79,12 +79,13 @@ BO_ 1483 Light_Pos_Respond_OTA: 8 Light
 BO_ 458 Light_Request_OBD: 1 Light
  SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  CGW
 
-BO_ 1481 Light_Info_Cluster: 1 Light
- SG_ sig_rain_road : 3|1@1+ (1,0) [0|1] ""  CGW
- SG_ sig_drive_mode : 1|2@1+ (1,0) [0|3] ""  CGW
- SG_ sig_fog_light : 5|1@1+ (1,0) [0|0] ""  CGW
- SG_ sig_low_beam : 0|1@1+ (1,0) [0|0] ""  CGW
- SG_ sig_high_beam : 4|1@1+ (1,0) [0|0] ""  CGW
+BO_ 1481 Light_Info_Cluster: 6 Light
+ SG_ sig_corner_light : 40|8@1+ (1,0) [0|255] ""  CGW
+ SG_ sig_rain_road : 16|8@1+ (1,0) [0|1] ""  CGW
+ SG_ sig_drive_mode : 8|8@1+ (1,0) [0|3] ""  CGW
+ SG_ sig_fog_light : 32|8@1+ (1,0) [0|0] ""  CGW
+ SG_ sig_low_beam : 0|8@1+ (1,0) [0|0] ""  CGW
+ SG_ sig_high_beam : 24|8@1+ (1,0) [0|0] ""  CGW
 
 BO_ 1673 VUM_File_Illuminate: 8 CGW
  SG_ sig_payload : 0|64@1- (1,0) [0|0] ""  Illuminate
