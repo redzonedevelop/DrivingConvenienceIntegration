@@ -596,7 +596,7 @@ on message ADASCAN::ADAS_Control_Brake
 on message ADASCAN::ADAS_Control_Motor
 {
 
-  motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//�׳� longitudinal speed�� �������?
+  motor_control_p_msg.sig_control_speed = this.sig_control_accerleration;//�׳� longitudinal speed�� �������?
   //motor_control_p_msg.sig_control_speed = @sysvar::Motor::longitudinal_speed;
   write("cgw speed %d\n",this.sig_control_accerleration);
   output(motor_control_p_msg);
@@ -604,7 +604,7 @@ on message ADASCAN::ADAS_Control_Motor
 
 on message ADASCAN::ADAS_Control_Steering
 {
-  steering_control_c_msg.sig_control_steering = this.sig_control_steering; // todo��Ƽ����� ����ؼ������ص־���?
+  steering_control_c_msg.sig_control_steering = this.sig_control_steering; // todo��Ƽ����� ����ؼ������ص־���?
   output(steering_control_c_msg);
 }
 
@@ -885,7 +885,17 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
     }
   }
   else if(buffer[0] == UPDATE_MODE){  
-    switch(buffer[1] >> 2)
+    vum_request_p_msg.sig_sid = UPDATE_MODE;
+    output(vum_request_p_msg);
+    vum_request_c_msg.sig_sid = UPDATE_MODE;
+    output(vum_request_c_msg);
+    vum_request_adas_msg.sig_sid = UPDATE_MODE;
+    output(vum_request_adas_msg);
+    vum_request_b_msg.sig_sid = UPDATE_MODE;
+    output(vum_request_b_msg);
+    vum_request_oc_msg.sig_sid = UPDATE_MODE;
+    output(vum_request_oc_msg);
+    /*switch(buffer[1] >> 2)
     {
       case 0:
         vum_request_p_msg.sig_sid = UPDATE_MODE;
@@ -907,7 +917,7 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
         vum_request_oc_msg.sig_sid = UPDATE_MODE;
         output(vum_request_oc_msg);
         break;
-    }
+    }*/
   }
   else if(buffer[0] == METADATA){
     // send message to target domain
@@ -984,11 +994,6 @@ void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, by
 
     // to-do
   }
-  else if(buffer[0] == 0x13){
-    
-    //metadata_receive_respond();
-
-  }
 
   // To receive more data, we have to call ReceiveFrom again.
   gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
@@ -1011,8 +1016,9 @@ on timer send_payload{
     for (i = 0; i < elcount(payload_buffer); i++) {
       payload_buffer[i] = 0;
     } 
-    payload_receive_offset = 0;
-    payload_send_offset = 0;
+    //payload_receive_offset = 0;
+    //payload_send_offset = 0;
+    write("HAHAHAHA");
     return;  
   }
   
@@ -1021,6 +1027,9 @@ on timer send_payload{
     case Motor:
       for(i = 0; i < len; i++){
         vum_payload_motor_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
+      }
+      if(len < 8){
+        vum_payload_motor_msg.dlc = len;
       }
       output(vum_payload_motor_msg);
       break;
@@ -1076,6 +1085,9 @@ on timer send_payload{
       for(i = 0; i < len; i++){
         vum_payload_light_msg.sig_payload.byte(i) = payload_buffer[payload_send_offset + i];
       }
+      if(len < 8){
+        vum_payload_light_msg.dlc = len;
+      }
       output(vum_payload_light_msg);
       break;
     case Seat:
@@ -1099,6 +1111,8 @@ on timer send_payload{
   }
   
   payload_send_offset += len;
+  
+  @sysvar::VUM::update_progress = (int)(((double)payload_send_offset / (double)file_size) * 100);
   
   write("payload_send_offset: %d, file_size: %d",payload_send_offset, file_size);
   
