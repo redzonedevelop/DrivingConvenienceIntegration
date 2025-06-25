@@ -1,0 +1,5 @@
+../Core/Src/boot.c:12:10:bootInit	24	static
+../Core/Src/boot.c:33:10:bootVerifyUpdate	168	static
+../Core/Src/boot.c:73:10:bootVerifyFirm	168	static
+../Core/Src/boot.c:104:10:bootUpdateFirm	552	static
+../Core/Src/boot.c:174:10:bootJumpFirm	24	static,ignoring_inline_asm

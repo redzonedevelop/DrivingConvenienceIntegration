@@ -1,0 +1,5 @@
+../Core/Src/message.c:16:9:MessageBufferIsFull	0	static
+../Core/Src/message.c:22:6:MessageBufferFlush	0	static
+../Core/Src/message.c:29:9:MessageBufferIsEmpty	0	static
+../Core/Src/message.c:34:6:MessageBufferPut	16	static
+../Core/Src/message.c:44:6:MessageBufferGet	16	static

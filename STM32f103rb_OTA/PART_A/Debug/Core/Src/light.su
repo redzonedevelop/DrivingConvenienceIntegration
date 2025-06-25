@@ -1,0 +1,13 @@
+../Core/Src/light.c:12:6:ws2812_set_lowbeam_colors	48	static
+../Core/Src/light.c:43:6:ws2812_set_highbeam_colors	40	static
+../Core/Src/light.c:61:6:ws2812_show	8	static
+../Core/Src/light.c:70:6:set_lowbeam	8	static
+../Core/Src/light.c:80:6:set_highbeam	8	static
+../Core/Src/light.c:104:6:ws2812_scroll_init	32	static
+../Core/Src/light.c:89:6:light_init	8	static
+../Core/Src/light.c:145:6:low_beam_power_control	24	static
+../Core/Src/light.c:253:6:rainroad_mode_change	24	static
+../Core/Src/light.c:296:6:high_beam_power_control	24	static
+../Core/Src/light.c:338:6:foglight_power_control	24	static
+../Core/Src/light.c:380:6:cornerlight_power_control	32	static
+../Core/Src/light.c:492:6:change_light	8	static

@@ -1,0 +1,12 @@
+../Drivers/CMSIS/Include/core_cm3.h:1762:34:__NVIC_SystemReset	1
+../Core/Src/main.c:360:6:NVIC_Config	1
+../Core/Src/main.c:607:6:Error_Handler	0
+../Core/Src/main.c:324:6:SystemClock_Config	2
+../Core/Src/main.c:365:6:canMsgWrite	2
+../Core/Src/main.c:434:6:EraseFlashMemory	1
+../Core/Src/main.c:454:6:StartFirmwareUpdate	2
+../Core/Src/main.c:380:6:ProcessFirmwareMeta	3
+../Core/Src/main.c:408:6:HAL_CAN_RxFifo0MsgPendingCallback	9
+../Core/Src/main.c:468:10:bootVerifyUpdate	3
+../Core/Src/main.c:495:6:FirmwareUpdateStateMachine	14
+../Core/Src/main.c:204:5:main	6

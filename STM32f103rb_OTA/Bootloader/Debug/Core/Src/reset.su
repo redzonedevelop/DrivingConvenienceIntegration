@@ -1,0 +1,5 @@
+../Core/Src/reset.c:17:6:resetInit	24	static
+../Core/Src/reset.c:35:6:resetToBoot	8	static
+../Core/Src/reset.c:41:6:resetToReset	8	static
+../Core/Src/reset.c:46:6:resetSetBootMode	16	static
+../Core/Src/reset.c:52:10:resetGetBootMode	4	static
