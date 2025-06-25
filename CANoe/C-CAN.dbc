@@ -1,0 +1,139 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: ABS_Slave ABS Brake Steering Master
+
+
+BO_ 126 ABS_Slave_Active: 1 ABS_Slave
+ SG_ sig_abs_slave_active : 0|1@1- (1,0) [0|0] ""  Master
+
+BO_ 596 ABS_Alive: 1 ABS
+ SG_ sig_abs_alive : 0|1@1- (1,0) [0|0] ""  ABS_Slave
+
+BO_ 515 OBD_Neg_Respond_OBD: 2 Master
+ SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
+
+BO_ 514 OBD_Pos_Respond_OBD: 1 Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
+
+BO_ 1671 VUM_File_Steering: 8 Master
+ SG_ sig_payload : 0|64@1+ (1,0) [0|255] ""  Steering
+
+BO_ 1670 VUM_File_Brake: 8 Master
+ SG_ sig_payload : 0|64@1+ (1,0) [0|255] ""  Brake
+
+BO_ 1669 VUM_File_ABS: 8 Master
+ SG_ sig_payload : 0|64@1+ (1,0) [0|255] ""  ABS_Slave,ABS
+
+BO_ 1665 VUM_Metadata_ECU: 5 Master
+ SG_ sig_version : 16|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS_Slave,ABS
+ SG_ sig_ecu_name : 8|8@1+ (1,0) [0|255] ""  Steering,Brake,ABS_Slave,ABS
+ SG_ sig_file_size : 24|16@1+ (1,0) [0|65535] ""  Steering,Brake,ABS_Slave,ABS
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
+
+BO_ 1664 VUM_Request_ECU: 1 Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  ABS_Slave,Steering,Brake,ABS
+
+BO_ 1282 ADAS_Control_Steering: 2 Master
+ SG_ sig_control_steering : 0|10@1- (1,0) [-512|511] "radian"  Steering
+
+BO_ 1024 Motor_Info_ECU: 5 Master
+ SG_ sig_wheel_speed_RR : 32|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
+ SG_ sig_wheel_speed_RL : 24|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
+ SG_ sig_wheel_speed_FR : 16|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
+ SG_ sig_wheel_speed_FL : 8|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
+ SG_ sig_car_speed : 0|8@1+ (1,0) [0|255] "km/h"  ABS_Slave,ABS
+
+BO_ 259 ADAS_Control_Brake: 1 Master
+ SG_ sig_control_aeb : 0|1@1+ (1,0) [0|1] "flag"  Brake
+
+BO_ 1229 Steering_Neg_Respond_OTA: 2 Steering
+ SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1228 Steering_Pos_Respond_OTA: 8 Steering
+ SG_ sig_data : 8|56@1+ (1,0) [0|7.20575940379279E+16] ""  Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 199 Steering_Request_OBD: 1 Steering
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1195 ABS_Neg_Respond_OTA: 2 ABS
+ SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1194 ABS_Pos_Respond_OTA: 8 ABS
+ SG_ sig_data : 8|56@1+ (1,0) [0|7.20575940379279E+16] ""  Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 166 ABS_Request_OBD: 1 ABS
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1161 Brake_Neg_Respond_OTA: 2 Brake
+ SG_ sig_neg_respond : 8|8@1+ (1,0) [0|255] ""  Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1160 Brake_Pos_Respond_OTA: 8 Brake
+ SG_ sig_data : 8|56@1+ (1,0) [0|7.20575940379279E+16] ""  Master
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 133 Brake_Request_OBD: 1 Brake
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Master
+
+BO_ 1219 Steering_Angle_Info_ECU: 2 Steering
+ SG_ sig_steering_angle : 0|10@1- (1,0) [-180|180] ""  Master
+
+BO_ 130 AEB_Info_ECU: 1 Brake
+ SG_ sig_aeb_active : 0|1@1+ (1,0) [0|1] "flag"  Master
+
+BO_ 128 Brake_Control_ECU: 1 Brake
+ SG_ sig_brake_pressed : 7|1@1+ (1,0) [0|1] "flag"  ABS_Slave,ABS,Master
+ SG_ sig_brake_level : 0|7@1+ (1,0) [0|127] "%"  ABS_Slave,ABS,Master
+
+BO_ 1185 ABS_Info_Cluster: 1 ABS
+ SG_ sig_abs_active : 0|1@1+ (1,0) [0|1] "flag"  Master
+
+BO_TX_BU_ 1195 : ABS_Slave,ABS;
+BO_TX_BU_ 1194 : ABS_Slave,ABS;
+BO_TX_BU_ 166 : ABS_Slave,ABS;
+BO_TX_BU_ 1185 : ABS_Slave,ABS;
+
+
+BA_DEF_  "MultiplexExtEnabled" ENUM  "No","Yes";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "MultiplexExtEnabled" "No";
+BA_DEF_DEF_  "BusType" "CAN";
+

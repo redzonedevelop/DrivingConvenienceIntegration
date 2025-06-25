@@ -1,0 +1,96 @@
+/*@!Encoding:949*/
+includes {
+  
+}
+
+variables {
+  //send message
+  message ABS_Info_Cluster abs_msg;
+  message ABS_Slave_Active abs_slave_msg;
+  message CCAN::ABS_Pos_Respond_OTA abs_pos_msg;
+  message CCAN::ABS_Request_OBD abs_obd_msg;
+
+  //timer
+  msTimer t_5ms;
+  msTimer t_200ms;
+
+  //var
+  int alive_miss_count = 0;
+  int is_slave_active = 0;
+
+  int brake_pressed = 0;
+  int cur_speed = 0;
+  int prev_speed = 0;
+
+  float decel = 0.0;
+  int abs_active = 0;
+  int abs_prev = 0;
+}
+
+on start {
+  setTimerCyclic(t_5ms, 5); 
+}
+
+on message ABS_Alive
+{
+  alive_miss_count = 0;
+}
+
+// 속도 수신 (km/h)
+on message Motor_Info_ECU 
+{
+  cur_speed = this.sig_car_speed;
+}
+
+// 브레이크 입력 수신 (flag: 0 or 1)
+on message Brake_Control_ECU 
+{
+  brake_pressed = this.sig_brake_pressed;
+}
+
+on timer t_5ms
+{
+  alive_miss_count++;
+  if (alive_miss_count > 3 && is_slave_active == 0)
+  { 
+    is_slave_active = 1;
+    prev_speed = cur_speed; 
+    setTimerCyclic(t_200ms, 200);
+    abs_slave_msg.sig_abs_slave_active=1;
+    output(abs_slave_msg);
+    
+    abs_obd_msg.sig_sid = 0x10;
+    output(abs_obd_msg);
+    write("abs_Slave on");
+    cancelTimer(t_5ms);
+  }
+}
+
+// ABS 판단 및 메시지 전송
+on timer t_200ms {
+  // 감속도 계산 (단위: km/h/s)
+  decel = ((float)(prev_speed - cur_speed)) / 0.2;
+
+  // ABS 작동 조건: 브레이크 + 급감속(25km/h/s 이상)
+  if (brake_pressed && decel > 25.0) {
+    abs_active = 1;
+  } else {
+    abs_active = 0;
+  }
+
+  // ABS 상태 메시지 전송
+  abs_msg.sig_abs_active = abs_active;
+  output(abs_msg);
+
+  // 다음 주기를 위한 속도 갱신
+  prev_speed = cur_speed;
+}
+
+// OTA 요청 응답 처리
+on message CCAN::VUM_Request_ECU {
+  cancelTimer(t_5ms);
+  cancelTimer(t_200ms);
+  abs_pos_msg.sig_sid = this.sig_sid + 0x40; // SID 응답값
+  output(abs_pos_msg);
+}
+

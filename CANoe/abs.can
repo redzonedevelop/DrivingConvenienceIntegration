@@ -1,0 +1,197 @@
+/*@!Encoding:949*/
+includes {
+}
+
+variables {
+  // send message
+  message ABS_Info_Cluster abs_msg;
+  message ABS_Alive abs_alive_msg;
+  message CCAN::ABS_Pos_Respond_OTA abs_pos_msg;
+  message CCAN::ABS_Neg_Respond_OTA abs_neg_msg;
+
+
+  // timer
+  msTimer t_200ms;
+  msTimer t_5ms;
+
+  // var
+  int brake_pressed = 0;
+  int cur_speed = 0;
+  int prev_speed = 0;
+
+  float decel = 0.0; 
+  int abs_active = 0;
+
+  int my_ecu_name = 5;
+  byte rxbuffer[20000];
+  int rxoffset = 0;
+  int metadata_recved = 0;
+
+  // metadata
+  int version = 0;
+  int file_size = 0;
+  
+  // file
+  dword fd = 0;
+}
+
+on start {
+  setTimerCyclic(t_200ms, 200); 
+  setTimerCyclic(t_5ms, 5);
+}
+
+on message Motor_Info_ECU {
+  cur_speed = this.sig_car_speed;
+}
+
+on message Brake_Control_ECU {
+  brake_pressed = this.sig_brake_pressed;
+}
+
+on timer t_5ms
+{
+  if(@sysvar::`ABS::abs_error==0)
+    output(abs_alive_msg);
+}
+
+on timer t_200ms {
+  decel = ((float)(prev_speed - cur_speed)) / 0.2;
+
+  if (brake_pressed && decel > 25.0) {
+    abs_active = 1;
+  } else {
+    abs_active = 0;
+  }
+
+  abs_msg.sig_abs_active = abs_active;
+  if(@sysvar::`ABS::abs_error==0)
+    output(abs_msg);
+
+  prev_speed = cur_speed;
+}
+
+on message CCAN::VUM_Request_ECU
+{
+  if(this.sig_sid ==0x12)
+  {
+    cancelTimer(t_5ms);
+    cancelTimer(t_200ms);
+    abs_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(abs_pos_msg);
+  }
+  
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset == file_size)
+      {
+        abs_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        abs_neg_msg.sig_neg_respond = 0x7F;
+        abs_neg_msg.sig_sid = this.sig_sid;
+      }
+      output(abs_pos_msg);
+    }
+  }
+  
+  //negative
+}
+
+on message CCAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    file_size = this.sig_file_size;
+    version = this.sig_version;
+    abs_pos_msg.sig_sid = this.sig_sid + 0x40;
+    output(abs_pos_msg);
+    metadata_recved = 1;
+  }
+  write("metadata comes in!");
+}
+
+dword calcCRC32(byte data[], int len)
+{
+  int i, j;
+  dword temp, crc, mask;
+  
+  i = 0;
+  crc = 0xFFFFFFFF;
+  while(i < len){
+    temp = (dword)data[i];
+    crc = crc ^ temp;
+    for (j = 7; j >= 0; j--){
+      mask = -(crc & 1);
+      crc = (crc >> 1) ^ (0xEDB88320 & mask);
+    }
+    i = i + 1;
+  }
+  return ~crc;
+}
+
+on message C_CAN::VUM_File_ABS
+{
+  int count = 0;
+  int len = 0;
+
+  if (file_size - rxoffset >= 8) {
+    len = 8;
+  }
+  else {
+    len = file_size - rxoffset;
+  }
+  for (count = 0;count < len;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++;
+    write("rxbuffer data: %d", this.byte(count));
+  }
+
+
+  if ((rxoffset % 4096 == 0) || rxoffset == file_size) {
+    if(rxoffset == file_size){
+      dword receivedCRC;
+      dword calculatedCRC;
+      int dataLen;
+
+      if (rxoffset > 4)
+      {
+        dataLen = rxoffset - 4;
+        receivedCRC = ((dword)(rxbuffer[dataLen]     & 0XFF) << 24) | 
+                      ((dword)(rxbuffer[dataLen + 1] & 0xFF) << 16) | 
+                      ((dword)(rxbuffer[dataLen + 2] & 0XFF) << 8)  | 
+                      ((dword)(rxbuffer[dataLen + 3])& 0XFF);
+        calculatedCRC = calcCRC32(rxbuffer, dataLen);
+
+        write("ECU Received CRC32 = 0x%08X, ECU Calculated CRC32 = 0x%08X", receivedCRC, calculatedCRC);
+        
+        //file write
+        setWritePath("C:\\Users\\USER\\Desktop\\Project3\\ota_results");
+        fd = OpenFileWrite ("ABS.bin",3);
+        
+        if ( fd!=0 )
+        {
+          fileWriteBinaryBlock (rxbuffer, dataLen ,fd);
+        }
+        else
+        {
+          write ("File 'data.bin' was not opened for write access.");
+        }
+        
+        // file close
+        fileClose (fd);
+      }
+    }
+    abs_pos_msg.sig_sid = 0x14 + 0x40;
+    output(abs_pos_msg);
+  }
+  
+  @sysvar::VUM::update_progress = (int)(((double)rxoffset / (double)file_size) * 100);
+
+  write("payload comes in!, %d", rxoffset);
+
+}
+

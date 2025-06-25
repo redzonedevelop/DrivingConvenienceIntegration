@@ -1,0 +1,412 @@
+/*@!Encoding:1252*/
+variables
+{
+  UdpSocket gSocket;
+  byte      gRxBuffer[20000];
+  byte      gTxBuffer[20000];
+  
+  msTimer send_data;
+  msTimer req_user_approve;
+  msTimer req_update_mode;
+  int receive_flag = 0;
+  
+  int fullLength = 0;
+  int chunkSize = 251;
+  int offset = 0;
+  
+  //states
+  const int STATE_USER_APPROVE = 0;
+  const int STATE_UPDATE_MODE = 1;
+  const int STATE_INSTALL_APPROVE = 2;
+  const int STATE_SEND_METADATA = 3;
+  const int STATE_SEND_PAYLOAD = 4;
+  const int STATE_VERIFICATION = 5;
+  const int STATE_ROLLBACK = 6;
+  const int STATE_END = 7;
+  
+  // CURRENT STATE
+  int cur_state = STATE_END;
+  
+  // STATE_SEND_PAYLOAD
+  int payload_sended = 0;
+  int payload_received = 0;
+  int payload_fullLength = 0;
+  
+  // request & respond
+  const int DTC = 0x10;
+  const int RXSWIN = 0x11;
+  const int UPDATE_MODE = 0x12;
+  const int METADATA = 0x13;
+  const int PAYLOAD = 0x14;
+  const int VERIFY = 0x15;
+  const int ROLLBACK = 0x16;
+  const int OTA_ERROR = 0x7F;
+}
+
+on sysvar_update sysvar::VUM::fileupload{
+  //setTimer(req_user_approve, 3000); // OTA process start
+}
+
+// send message with no data
+void send_request(){
+  byte chunk[10];
+  dword crc;
+  
+  switch(cur_state)
+  {
+    case STATE_UPDATE_MODE:
+      chunk[0] = UPDATE_MODE;
+      chunk[1] = (byte)@sysvar::VUM::ecu_number;
+      crc = calcCRC32(chunk, 2);
+  
+      chunk[2] = (crc >> 24) & 0xFF;
+      chunk[3] = (crc >> 16) & 0xFF;
+      chunk[4] = (crc >> 8) & 0xFF;
+      chunk[5] = crc & 0xFF;
+  
+      gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), chunk, 6 );
+      break;
+    case STATE_VERIFICATION:
+      chunk[0] = VERIFY;
+      crc = calcCRC32(chunk, 1);
+  
+      chunk[1] = (crc >> 24) & 0xFF;
+      chunk[2] = (crc >> 16) & 0xFF;
+      chunk[3] = (crc >> 8) & 0xFF;
+      chunk[4] = crc & 0xFF;
+  
+      gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), chunk, 5 );
+      break;
+  }
+}
+
+// send message with data
+on timer send_data
+{
+  byte chunk[256];
+  int len;
+  int i;
+  dword crc;
+  
+  if (fullLength - offset >= chunkSize){
+    len = chunkSize;
+  }
+  else{
+    len = fullLength - offset;
+  }
+  
+  if (offset >= fullLength){
+    for (i = 0; i < elcount(gTxBuffer); i++) {
+      gTxBuffer[i] = 0;
+    } 
+    return;  
+  }
+    
+  for(i = 0; i < len; i++){
+    chunk[i] = gTxBuffer[offset + i];
+  }
+  
+  crc = calcCRC32(chunk, len);
+  
+  chunk[len]     = (crc >> 24) & 0xFF;
+  chunk[len + 1] = (crc >> 16) & 0xFF;
+  chunk[len + 2] = (crc >> 8) & 0xFF;
+  chunk[len + 3] = crc & 0xFF;
+
+    
+    // send text to IP address/UDP port of the receiver
+  gSocket.SendTo( IP_Endpoint(192.168.1.2:40001), chunk, len + 4 );
+  
+  write("CRC32 calculated: 0x%08X", crc);
+  
+  offset += len;
+  setTimer(send_data, 100);
+}
+
+// if you want to send message, use this..
+void send_message(){
+  int i;
+  int fd;
+  dword crc;
+  
+  switch(cur_state)
+  {
+    case STATE_UPDATE_MODE:
+      offset = 0;
+      fullLength = 0;
+      send_request();
+      break;
+    case STATE_SEND_METADATA:
+      gTxBuffer[0] = METADATA;
+      gTxBuffer[1] = (byte)@sysvar::VUM::ecu_number;
+      gTxBuffer[2] = (byte)@sysvar::VUM::version;
+      gTxBuffer[3] = (byte)(@sysvar::VUM::file_size + 4);
+      gTxBuffer[4] = (byte)((@sysvar::VUM::file_size + 4) >> 8);
+      
+      offset = 0;
+      fullLength = 5;
+      
+      setTimer(send_data, 1000);
+      break;
+    case STATE_SEND_PAYLOAD:
+      write("send payload");
+      fd = openFileRead("C:\\Users\\USER\\Desktop\\Project3\\OTA_CANoe\\data.bin", 1);
+      
+      offset = 0;
+      fullLength = @sysvar::VUM::file_size;
+      payload_fullLength = fullLength;
+      
+      fileGetBinaryBlock(gTxBuffer, payload_fullLength, fd);
+      
+      fileClose(fd);
+      
+      fullLength = payload_fullLength + 4;
+      
+      crc = calcCRC32(gTxBuffer, payload_fullLength);
+  
+      gTxBuffer[payload_fullLength] = (crc >> 24) & 0xFF;
+      gTxBuffer[payload_fullLength + 1] = (crc >> 16) & 0xFF;
+      gTxBuffer[payload_fullLength + 2] = (crc >> 8) & 0xFF;
+      gTxBuffer[payload_fullLength + 3] = crc & 0xFF;
+      
+      setTimer(send_data, 100);
+      break;
+    case STATE_VERIFICATION:
+      write("send verification");
+      offset = 0;
+      fullLength = 0;
+      send_request();
+      break;
+  }
+}
+
+//update led on
+on timer req_user_approve{
+  cur_state = STATE_USER_APPROVE;
+  @sysvar::VUM::update_message = 1;
+}
+
+// update yes -> update mode
+on sysvar_update sysvar::VUM::update_yes_button{
+  if(@this == 1 && cur_state == STATE_USER_APPROVE){
+    write("update_button_pressed");
+    cur_state = STATE_UPDATE_MODE;
+    //setTimerCyclic(req_update_mode, 100);
+    send_message();
+  }
+}
+
+// update no -> end
+on sysvar_update sysvar::VUM::update_no_button{
+  if(@this == 1 && cur_state == STATE_USER_APPROVE){
+    cur_state = STATE_END;
+    @sysvar::VUM::update_message = 0;
+  }
+}
+
+// STATE_USER_APPROVE
+
+// ask user update or not
+on timer req_update_mode{
+  if(cur_state == STATE_UPDATE_MODE){
+    send_message();
+  }
+}
+
+// STATE_UPDATE_MODE
+
+void req_install_approve(){
+  @sysvar::VUM::install_message = 1;
+}
+
+// install yes -> send metadata
+on sysvar_update sysvar::VUM::install_yes_button{
+  if(@this == 1 && cur_state == STATE_INSTALL_APPROVE){
+    write("install button pressed");
+    cur_state = STATE_SEND_METADATA;
+    send_metadata();
+  }
+}
+
+// install no -> end
+on sysvar_update sysvar::VUM::install_no_button{
+  if(@this == 1 && cur_state == STATE_INSTALL_APPROVE){
+    cur_state = STATE_END;
+    @sysvar::VUM::update_message = 0;
+    @sysvar::VUM::install_message = 0;
+  }
+}
+
+// INSTALL APPROVE STATE
+
+void send_metadata(){
+  if(cur_state == STATE_SEND_METADATA)
+    send_message();
+}
+
+// STATE_SEND_METADATA
+
+void send_payload(){
+  if(cur_state == STATE_SEND_PAYLOAD)
+    send_message();
+}
+
+// STATE_SEND_PAYLOAD
+
+void verify(){
+  if(cur_state == STATE_VERIFICATION)
+    send_message();
+}
+
+void roll_back(){
+}
+
+on start
+{
+  // Open an UDP socket. As source address 0.0.0.0 is used, this means that
+  // the configure address of the TCP/IP stack is used. See TCP/IP stack
+  // configuration dialog in the simulation setup
+  // As port no ist used, this means a source port is dynamically assign
+  // by the TCP/IP stack.
+  
+  gSocket = UdpSocket::Open( IP_Endpoint(0.0.0.0:40001) );
+   
+  if (IpGetLastError() != 0)
+  {
+    // if UdpSocket::Open fails, we print a message to the write window
+    write( "<%BASE_FILE_NAME%> UdpSocket::Open failed with result %d", IpGetLastError() );
+  }
+    
+  // To receive data with the created socket, we have to call ReceiveFrom.
+  gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
+    
+  // if ReceiveFrom does not immediatelly copy to to gRxBuffer, it returns 997 to
+  // indicate it will call the callback function OnUdpReceiveFrom later.
+  if ((gSocket.GetLastSocketError() != 0) && (gSocket.GetLastSocketError()  != 997))
+  {
+    char errorString[100];
+    // if ReceiveFrom fails, we print a message to the write window
+    gSocket.GetLastSocketErrorAsString( errorString, elcount(errorString) );
+    write( "<%BASE_FILE_NAME%> ReceiveFrom failed with result %d (%s)", IpGetLastError(), errorString );
+  }
+  
+  setTimer(req_user_approve, 3000); // OTA process start
+}
+
+dword calcCRC32(byte data[], int len)
+{
+  int i, j;
+  dword temp, crc, mask;
+  
+  i = 0;
+  crc = 0xFFFFFFFF;
+  while(i < len){
+    temp = (dword)data[i];
+    crc = crc ^ temp;
+    for (j = 7; j >= 0; j--){
+      mask = -(crc & 1);
+      crc = (crc >> 1) ^ (0xEDB88320 & mask);
+    }
+    i = i + 1;
+  }
+  return ~crc;
+}
+
+on preStop
+{
+  // Close socket on measurement stop
+  gSocket.Close();
+}
+
+// Callback function, which is called if a UDP packet is received
+void OnUdpReceiveFrom( dword socket, long result, ip_Endpoint remoteEndpoint, byte buffer[], dword size)
+{
+  int dataLen;
+  dword receivedCRC;
+  dword calculatedCRC;
+  
+  if (result == 0)
+  {
+    char endpointString[30];
+    
+    remoteEndpoint.PrintEndpointToString( endpointString );
+
+    if (size > 4)
+    {
+      dataLen = size - 4;
+      receivedCRC = ((dword)(buffer[dataLen]     & 0XFF) << 24) | 
+                    ((dword)(buffer[dataLen + 1] & 0xFF) << 16) | 
+                    ((dword)(buffer[dataLen + 2] & 0XFF) << 8)  | 
+                    ((dword)(buffer[dataLen + 3])& 0XFF);
+      calculatedCRC = calcCRC32(buffer, dataLen);
+
+      write("VUM Received CRC32 = 0x%08X, VUM Calculated CRC32 = 0x%08X", receivedCRC, calculatedCRC);
+
+      if (receivedCRC == calculatedCRC) {
+        write("CRC correct");
+      } else {
+        write("CRC miss");
+      }
+    }
+    else
+    {
+      write( "data too short" );
+    }
+  }
+  
+  // update available & ask user install or not
+  if(cur_state == STATE_UPDATE_MODE){
+    // can update
+    if((buffer[0] - 0x40) == UPDATE_MODE && buffer[1] == @sysvar::VUM::ecu_number){
+      write("update mode ready!");
+      cancelTimer(req_update_mode);
+      cur_state = STATE_INSTALL_APPROVE;
+      req_install_approve();
+    }
+    // can't update
+    else{
+      write("wait! ecu number is %d", buffer[1]);
+    }
+  }
+  else if(cur_state == STATE_SEND_METADATA){
+    // metadata received successfully
+    if((buffer[0] - 0x40) == METADATA){
+      write("metadata received successfully");
+      cur_state = STATE_SEND_PAYLOAD;
+      send_payload();
+    }
+    // metadata receive error
+    else{
+      write("wait!");
+      //send_metadata(); // send metadata again
+    }
+  }
+  else if(cur_state == STATE_SEND_PAYLOAD){
+    // payload received successfully
+    if((buffer[0] - 0x40) == PAYLOAD){
+      cur_state = STATE_VERIFICATION;
+      verify();
+    }
+    // can't send payload
+    else{
+      write("wait!");
+      //send_metadata(); // send metadata again
+      payload_received = 0; // re-send preparation
+      payload_sended = 0; // re-send preparation
+    }
+  }
+  else if(cur_state == STATE_VERIFICATION){
+    // verification received successfully
+    if((buffer[0] - 0x40) == VERIFY){
+      write("verification received successfully");
+      cur_state = STATE_END;
+    }
+    // error 
+    else{
+      write("wait!");
+    }
+  }
+  
+  // To receive more data, we have to call ReceiveFrom again.
+  gSocket.ReceiveFrom( gRxBuffer, elcount(gRxBuffer) );
+}

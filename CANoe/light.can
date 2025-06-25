@@ -1,0 +1,212 @@
+/*@!Encoding:949*/ 
+includes
+{
+  
+}
+
+variables
+{
+  int steering;
+  int threshold = 30;
+  int my_ecu_name = 14;
+  byte rxbuffer[20000];
+  int rxoffset = 0;
+  int metadata_recved = 0;
+  msTimer sendTimer100;
+  message BODY::Light_Info_Cluster light_info_msg;
+  message Light_Pos_Respond_OTA light_pos_msg;
+  message Light_Neg_Respond_OTA light_neg_msg;
+  
+  // metadata
+  int version = 0;
+  int file_size = 0;
+  
+  // file
+  dword fd = 0;
+}
+on start
+{
+  setTimerCyclic(sendTimer100, 100); 
+}
+
+on timer sendTimer100
+{
+  
+  if(@sysvar::Light::light_active ==1)
+  {
+    light_info_msg.sig_low_beam = 1;
+    if(@sysvar::Motor::longitudinal_speed <50) 
+    {
+      light_info_msg.sig_drive_mode = 0;
+      light_info_msg.sig_high_beam = 0;
+    }
+    else if(@sysvar::Motor::longitudinal_speed >50 && @sysvar::Motor::longitudinal_speed <100) 
+    {
+      light_info_msg.sig_drive_mode = 1;
+      light_info_msg.sig_high_beam = 1;
+    }
+    else 
+    {
+      light_info_msg.sig_drive_mode = 2;
+      light_info_msg.sig_high_beam = 1;
+    }
+    light_info_msg.sig_fog_light = @sysvar::Light::fog_active;
+    output(light_info_msg);
+  }
+  else
+  {
+    light_info_msg.sig_low_beam = 0;
+    light_info_msg.sig_high_beam = 0;
+    light_info_msg.sig_fog_light = 0;
+    output(light_info_msg);
+  }
+  
+  
+  //write("light_active = %d fog_active = %d high = %d low = %d",@sysvar::Light::light_active,light_info_msg.sig_fog_light,light_info_msg.sig_high_beam,light_info_msg.sig_low_beam);
+  
+}
+
+on message BODY::Steering_Angle_Info_ECU
+{
+  if(@sysvar::Light::light_active ==1)
+  {
+    if(this.sig_steering_angle>threshold)
+    {
+      @sysvar::Light::corner_light_left = 1;
+      @sysvar::Light::corner_light_right = 0;
+    }
+    else if(this.sig_steering_angle<(-1*threshold))
+    {
+      @sysvar::Light::corner_light_right = 1;
+      @sysvar::Light::corner_light_left = 0;
+    }
+    else
+    {
+      @sysvar::Light::corner_light_left = 0;
+      @sysvar::Light::corner_light_right = 0;
+    }
+  }
+  
+  
+}
+
+on message BODY::VUM_Request_ECU
+{
+  if(this.sig_sid ==0x12)
+  {
+    cancelTimer(sendTimer100);
+    light_pos_msg.sig_sid = this.sig_sid+0x40;
+    output(light_pos_msg);
+  }
+  
+  if(this.sig_sid ==0x15)
+  {
+    if(metadata_recved ==1)
+    {
+      if (rxoffset == file_size)
+      {
+        light_pos_msg.sig_sid = this.sig_sid+0x40;
+      }
+      else
+      {
+        light_neg_msg.sig_neg_respond = 0x7F;
+        light_neg_msg.sig_sid = this.sig_sid;
+      }
+      output(light_pos_msg);
+    }
+  }
+  
+  //negative
+}
+
+on message B_CAN::VUM_Metadata_ECU
+{
+  if(this.sig_ecu_name == my_ecu_name)
+  {
+    file_size = this.sig_file_size;
+    version = this.sig_version;
+    light_pos_msg.sig_sid = this.sig_sid + 0x40;
+    output(light_pos_msg);
+    metadata_recved = 1;
+  }
+  write("metadata comes in!");
+}
+
+dword calcCRC32(byte data[], int len)
+{
+  int i, j;
+  dword temp, crc, mask;
+  
+  i = 0;
+  crc = 0xFFFFFFFF;
+  while(i < len){
+    temp = (dword)data[i];
+    crc = crc ^ temp;
+    for (j = 7; j >= 0; j--){
+      mask = -(crc & 1);
+      crc = (crc >> 1) ^ (0xEDB88320 & mask);
+    }
+    i = i + 1;
+  }
+  return ~crc;
+}
+
+on message B_CAN::VUM_File_Light
+{
+  int count = 0;
+  int len = 0;
+
+  if (file_size - rxoffset >= 8) {
+    len = 8;
+  }
+  else {
+    len = file_size - rxoffset;
+  }
+  for (count = 0;count < len;count++)
+  {
+    rxbuffer[rxoffset] = this.byte(count);
+    rxoffset++;
+  }
+
+  if ((rxoffset % 4096 == 0) || rxoffset == file_size) {
+    if(rxoffset == file_size){
+      dword receivedCRC;
+      dword calculatedCRC;
+      int dataLen;
+
+      if (rxoffset > 4)
+      {
+        dataLen = rxoffset - 4;
+        receivedCRC = ((dword)(rxbuffer[dataLen]     & 0XFF) << 24) | 
+                      ((dword)(rxbuffer[dataLen + 1] & 0xFF) << 16) | 
+                      ((dword)(rxbuffer[dataLen + 2] & 0XFF) << 8)  | 
+                      ((dword)(rxbuffer[dataLen + 3])& 0XFF);
+        calculatedCRC = calcCRC32(rxbuffer, dataLen);
+
+        write("ECU Received CRC32 = 0x%08X, ECU Calculated CRC32 = 0x%08X", receivedCRC, calculatedCRC);
+        
+        //file write
+        setWritePath("C:\\Users\\USER\\Desktop\\Project3\\ota_results");
+        fd = OpenFileWrite ("Light.bin",3);
+        
+        if ( fd!=0 )
+        {
+          fileWriteBinaryBlock (rxbuffer, dataLen ,fd);
+        }
+        else
+        {
+          write ("File 'data.bin' was not opened for write access.");
+        }
+        
+        // file close
+        fileClose (fd);
+      }
+    }
+    light_pos_msg.sig_sid = 0x14 + 0x40;
+    output(light_pos_msg);
+  }
+  
+  @sysvar::VUM::update_progress = (int)(((double)rxoffset / (double)file_size) * 100);
+
+  write("payload comes in!, %d", rxoffset);
+}

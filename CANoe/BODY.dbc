@@ -1,0 +1,212 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: CGW Seat Light Illuminate Rain
+VAL_TABLE_ onOff 1 "ON" 0 "OFF" ;
+VAL_TABLE_ isRainy 1 "rainy" 0 "sunny" ;
+VAL_TABLE_ TestECUState 1 "ON" 0 "OFF" ;
+VAL_TABLE_ vtbSensorReqCause 15 "SNA" 2 "by Request 2" 1 "by Request 1" 0 "normal cycle" ;
+VAL_TABLE_ vtbErrorDescription 255 "ERROR" ;
+
+
+BO_ 1677 VUM_File_Seat: 8 CGW
+ SG_ sig_payload : 0|64@1- (1,0) [0|0] ""  Seat
+
+BO_ 1519 Seat_Neg_Respond_OTA: 2 Seat
+ SG_ sig_sid : 8|8@1- (1,0) [0|0] ""  CGW
+ SG_ sig_neg_respond : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 1518 Seat_Pos_Respond_OTA: 8 Seat
+ SG_ sig_data : 16|56@1- (1,0) [0|0] ""  CGW
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 493 Seat_Request_OBD: 1 Vector__XXX
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 1676 VUM_File_Light: 8 CGW
+ SG_ sig_payload : 0|64@1- (1,0) [0|0] ""  Light
+
+BO_ 1219 Steering_Angle_Info_ECU: 2 CGW
+ SG_ sig_steering_angle : 0|10@1- (1,0) [-512|511] ""  Seat,Light
+
+BO_ 1024 Motor_Info_ECU: 5 CGW
+ SG_ sig_wheel_speed_RR : 32|8@1- (1,0) [0|0] ""  Seat,Light
+ SG_ sig_wheel_speed_RL : 24|8@1- (1,0) [0|0] ""  Seat,Light
+ SG_ sig_wheel_speed_FR : 16|8@1- (1,0) [0|0] ""  Seat,Light
+ SG_ sig_wheel_speed_FL : 8|8@1- (1,0) [0|0] ""  Seat,Light
+ SG_ sig_car_speed : 0|8@1- (1,0) [0|0] ""  Seat,Light
+
+BO_ 1484 Light_Neg_Respond_OTA: 2 Light
+ SG_ sig_sid : 8|8@1- (1,0) [0|0] ""  CGW
+ SG_ sig_neg_respond : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 1483 Light_Pos_Respond_OTA: 8 Light
+ SG_ sig_data : 16|56@1- (1,0) [0|0] ""  CGW
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 458 Light_Request_OBD: 1 Light
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 1481 Light_Info_Cluster: 6 Light
+ SG_ sig_corner_light : 40|8@1+ (1,0) [0|255] ""  CGW
+ SG_ sig_rain_road : 16|8@1+ (1,0) [0|1] ""  CGW
+ SG_ sig_drive_mode : 8|8@1+ (1,0) [0|3] ""  CGW
+ SG_ sig_fog_light : 32|8@1+ (1,0) [0|0] ""  CGW
+ SG_ sig_low_beam : 0|8@1+ (1,0) [0|0] ""  CGW
+ SG_ sig_high_beam : 24|8@1+ (1,0) [0|0] ""  CGW
+
+BO_ 1673 VUM_File_Illuminate: 8 CGW
+ SG_ sig_payload : 0|64@1- (1,0) [0|0] ""  Illuminate
+
+BO_ 1448 Illuminate_Neg_Respond_OTA: 2 Illuminate
+ SG_ sig_sid : 8|8@1- (1,0) [0|0] ""  CGW
+ SG_ sig_neg_respond : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 1447 Illuminate_Pos_Respond_OTA: 8 Illuminate
+ SG_ sig_data : 16|56@1- (1,0) [0|0] ""  CGW
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 422 Illuminate_Request_OBD: 1 Illuminate
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 1445 Illuminate_Info_Cluster: 2 Illuminate
+ SG_ sig_lux_info : 0|16@1- (1,0) [0|0] ""  Seat,CGW
+
+BO_ 0 Illuminate_Info_Light: 2 Illuminate
+ SG_ sig_lux_info : 0|16@1- (1,0) [0|0] ""  Light
+
+BO_ 515 OBD_Neg_Respond_OBD: 2 CGW
+ SG_ sig_neg_respond : 8|8@1- (1,0) [0|0] ""  Seat,Light,Illuminate,Rain
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  Seat,Light,Illuminate,Rain
+
+BO_ 514 OBD_Pos_Respond_OBD: 1 CGW
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  Seat,Light,Illuminate,Rain
+
+BO_ 1720 VUM_File_Rain: 8 CGW
+ SG_ sig_payload : 0|64@1- (1,0) [0|0] ""  Rain
+
+BO_ 1665 VUM_Metadata_ECU: 5 CGW
+ SG_ sig_version : 16|8@1+ (1,0) [0|255] ""  Seat,Rain,Light,Illuminate
+ SG_ sig_ecu_name : 8|8@1+ (1,0) [0|255] ""  Seat,Rain,Light,Illuminate
+ SG_ sig_file_size : 24|16@1+ (1,0) [0|65535] ""  Seat,Rain,Light,Illuminate
+ SG_ sig_sid : 0|8@1+ (1,0) [0|255] ""  Seat,Light,Illuminate,Rain
+
+BO_ 1664 VUM_Request_ECU: 1 CGW
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  Seat,Light,Illuminate,Rain
+
+BO_ 1411 Rain_Neg_Repond_OTA: 2 Rain
+ SG_ sig_sid : 8|8@1- (1,0) [0|0] ""  CGW
+ SG_ sig_neg_respond : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 1410 Rain_Pos_Respond_OTA: 8 Rain
+ SG_ sig_data : 16|56@1- (1,0) [0|0] ""  CGW
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 385 Rain_Request_OBD: 1 Rain
+ SG_ sig_sid : 0|8@1- (1,0) [0|0] ""  CGW
+
+BO_ 1408 Rain_Info_Light: 1 Rain
+ SG_ sig_rain_info : 0|1@1- (1,0) [0|0] ""  Light
+
+BO_TX_BU_ 385 : Seat,Rain;
+
+
+BA_DEF_  "DatabaseVersion" STRING ;
+BA_DEF_ BO_  "DiagState" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagResponse" ENUM  "No","Yes","vector_leerstring";
+BA_DEF_ BO_  "DiagRequest" ENUM  "No","Yes","vector_leerstring";
+BA_DEF_  "Manufacturer" STRING ;
+BA_DEF_ BU_  "NodeLayerModules" STRING ;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ SG_  "GenSigStartValue" FLOAT 0 1215752192;
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed";
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 100000;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotUsed","Cyclic","NotUsed","IfActive","NoMsgSendType","NotUsed","vector_leerstring";
+BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 999999;
+BA_DEF_ BO_  "GenMsgDelayTime" INT 0 1000;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 50000;
+BA_DEF_ BO_  "GenMsgCycleTimeFast" INT 0 50000;
+BA_DEF_ BO_  "GenMsgILSupport" ENUM  "No","Yes";
+BA_DEF_ BO_  "GenMsgFastOnStart" INT 0 100000;
+BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 100000;
+BA_DEF_DEF_  "DatabaseVersion" "";
+BA_DEF_DEF_  "DiagState" "No";
+BA_DEF_DEF_  "DiagResponse" "No";
+BA_DEF_DEF_  "DiagRequest" "No";
+BA_DEF_DEF_  "Manufacturer" "Vector";
+BA_DEF_DEF_  "NodeLayerModules" "CANoeILNLVector.dll";
+BA_DEF_DEF_  "BusType" "CAN";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenMsgCycleTime" 200;
+BA_DEF_DEF_  "GenMsgCycleTimeFast" 20;
+BA_DEF_DEF_  "GenMsgILSupport" "Yes";
+BA_DEF_DEF_  "GenMsgFastOnStart" 0;
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_ "DatabaseVersion" "1.1";
+BA_ "BusType" "CAN";
+BA_ "GenMsgSendType" BO_ 1219 0;
+BA_ "GenMsgCycleTime" BO_ 1219 5;
+BA_ "GenMsgCycleTime" BO_ 1024 5;
+BA_ "GenMsgCycleTime" BO_ 1484 0;
+BA_ "GenMsgCycleTime" BO_ 1483 0;
+BA_ "GenMsgCycleTime" BO_ 458 0;
+BA_ "GenMsgSendType" BO_ 1481 0;
+BA_ "GenMsgCycleTime" BO_ 1481 100;
+BA_ "GenMsgCycleTime" BO_ 1448 0;
+BA_ "GenMsgCycleTime" BO_ 1447 0;
+BA_ "GenMsgCycleTime" BO_ 422 0;
+BA_ "GenMsgCycleTime" BO_ 1445 100;
+BA_ "GenMsgCycleTime" BO_ 0 50;
+BA_ "GenMsgSendType" BO_ 0 0;
+BA_ "GenMsgCycleTime" BO_ 515 0;
+BA_ "GenMsgCycleTime" BO_ 514 0;
+BA_ "GenMsgCycleTime" BO_ 1720 0;
+BA_ "GenMsgCycleTime" BO_ 1665 0;
+BA_ "GenMsgCycleTime" BO_ 1664 0;
+BA_ "GenMsgCycleTime" BO_ 1411 0;
+BA_ "GenMsgCycleTime" BO_ 1410 0;
+BA_ "GenMsgCycleTime" BO_ 385 0;
+BA_ "GenMsgSendType" BO_ 1408 0;
+BA_ "GenMsgCycleTime" BO_ 1408 50;
+VAL_ 1481 sig_fog_light 1 "ON" 0 "OFF" ;
+VAL_ 1481 sig_low_beam 1 "ON" 0 "OFF" ;
+VAL_ 1481 sig_high_beam 1 "ON" 0 "OFF" ;
+VAL_ 1408 sig_rain_info 1 "rainy" 0 "sunny" ;
+
